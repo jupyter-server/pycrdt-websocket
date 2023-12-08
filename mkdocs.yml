@@ -1,6 +1,6 @@
-site_name: ypy-websocket
-site_description: Async WebSocket connector for Ypy
-repo_url: https://github.com/y-crdt/ypy-websocket
+site_name: pycrdt-websocket
+site_description: Async WebSocket connector for pycrdt
+repo_url: https://github.com/davidbrochart/pycrdt-websocket
 
 theme:
   name: 'material'

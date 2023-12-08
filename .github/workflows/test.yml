@@ -44,7 +44,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: environment-dev.yml
-          environment-name: ypy-websocket
+          environment-name: pycrdt-websocket
           extra-specs: python=${{ matrix.python-version }}
       - name: Install dependencies
         run: |
@@ -52,7 +52,7 @@ jobs:
           cd tests; npm install
       - name: Check types
         run: |
-          mypy ypy_websocket tests
+          mypy pycrdt_websocket tests
       - name: Run tests
         run: |
           pytest -v

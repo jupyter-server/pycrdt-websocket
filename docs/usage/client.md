@@ -5,7 +5,7 @@ Here is a code example using the [websockets](https://websockets.readthedocs.io)
 import asyncio
 import y_py as Y
 from websockets import connect
-from ypy_websocket import WebsocketProvider
+from pycrdt_websocket import WebsocketProvider
 
 async def client():
     ydoc = Y.YDoc()

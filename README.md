@@ -1,19 +1,19 @@
-# Ypy-websocket
+# Pycrdt-websocket
 
-Ypy-websocket is an async WebSocket connector for Ypy.
+Pycrdt-websocket is an async WebSocket connector for pycrdt.
 
-[![Build Status](https://github.com/y-crdt/ypy-websocket/workflows/CI/badge.svg)](https://github.com/y-crdt/ypy-websocket/actions)
+[![Build Status](https://github.com/davidbrochart/pycrdt-websocket/workflows/CI/badge.svg)](https://github.com/davidbrochart/pycrdt-websocket/actions)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ---
 
-**Documentation**: <a href="https://davidbrochart.github.io/ypy-websocket" target="_blank">https://davidbrochart.github.io/ypy-websocket</a>
+**Documentation**: <a href="https://davidbrochart.github.io/pycrdt-websocket" target="_blank">https://davidbrochart.github.io/pycrdt-websocket</a>
 
-**Source Code**: <a href="https://github.com/y-crdt/ypy-websocket" target="_blank">https://github.com/y-crdt/ypy-websocket</a>
+**Source Code**: <a href="https://github.com/davidbrochart/pycrdt-websocket" target="_blank">https://github.com/davidbrochart/pycrdt-websocket</a>
 
 ---
 
-Ypy-websocket is a Python library for building WebSocket servers and clients that connect and synchronize shared documents.
+Pycrdt-websocket is a Python library for building WebSocket servers and clients that connect and synchronize shared documents.
 It can be used to create collaborative web applications.
 
 The following diagram illustrates a typical architecture. The goal is to share a document among several clients.

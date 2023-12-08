@@ -1,15 +1,15 @@
 ## BaseYStore
 
-::: ypy_websocket.ystore.BaseYStore
+::: pycrdt_websocket.ystore.BaseYStore
 
 ## FileYStore
 
-::: ypy_websocket.ystore.FileYStore
+::: pycrdt_websocket.ystore.FileYStore
 
 ## TempFileYStore
 
-::: ypy_websocket.ystore.TempFileYStore
+::: pycrdt_websocket.ystore.TempFileYStore
 
 ## SQLiteYStore
 
-::: ypy_websocket.ystore.SQLiteYStore
+::: pycrdt_websocket.ystore.SQLiteYStore

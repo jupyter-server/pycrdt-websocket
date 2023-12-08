@@ -1,4 +1,4 @@
-# Making a ypy-websocket release
+# Making a pycrdt-websocket release
 
 ## Using `jupyter_releaser`
 

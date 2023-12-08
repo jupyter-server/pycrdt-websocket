@@ -4,14 +4,13 @@ import pytest
 from pycrdt import Array, Doc
 from websockets import serve  # type: ignore
 
-from ypy_websocket import WebsocketServer
+from pycrdt_websocket import WebsocketServer
 
 
 class TestYDoc:
     def __init__(self):
         self.ydoc = Doc()
-        self.array = Array()
-        self.ydoc["array"] = self.array
+        self.ydoc["array"] = self.array = Array()
         self.state = None
         self.value = 0
 

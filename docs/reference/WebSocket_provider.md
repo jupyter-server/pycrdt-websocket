@@ -1,1 +1,1 @@
-::: ypy_websocket.websocket_provider.WebsocketProvider
+::: pycrdt_websocket.websocket_provider.WebsocketProvider

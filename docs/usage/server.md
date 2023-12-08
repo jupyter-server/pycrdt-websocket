@@ -4,7 +4,7 @@ Here is a code example using the [websockets](https://websockets.readthedocs.io)
 ```py
 import asyncio
 from websockets import serve
-from ypy_websocket import WebsocketServer
+from pycrdt_websocket import WebsocketServer
 
 async def server():
     async with (
@@ -15,12 +15,12 @@ async def server():
 
 asyncio.run(server())
 ```
-Ypy-websocket can also be used with an [ASGI](https://asgi.readthedocs.io) server. Here is a code example using [Uvicorn](https://www.uvicorn.org):
+Pycrdt-websocket can also be used with an [ASGI](https://asgi.readthedocs.io) server. Here is a code example using [Uvicorn](https://www.uvicorn.org):
 ```py
 # main.py
 import asyncio
 import uvicorn
-from ypy_websocket import ASGIServer, WebsocketServer
+from pycrdt_websocket import ASGIServer, WebsocketServer
 
 websocket_server = WebsocketServer()
 app = ASGIServer(websocket_server)

@@ -1,4 +1,4 @@
-name: ypy-websocket
+name: pycrdt-websocket
 channels:
   - conda-forge
 dependencies:

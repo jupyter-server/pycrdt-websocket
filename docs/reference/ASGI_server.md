@@ -1,1 +1,1 @@
-::: ypy_websocket.asgi_server.ASGIServer
+::: pycrdt_websocket.asgi_server.ASGIServer

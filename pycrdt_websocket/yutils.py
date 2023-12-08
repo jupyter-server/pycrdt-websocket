@@ -99,7 +99,7 @@ class Decoder:
 
 def put_updates(update_send_stream: MemoryObjectSendStream, event: TransactionEvent) -> None:
     try:
-        update = event.get_update()  # type: ignore
+        update = event.update  # type: ignore
         update_send_stream.send_nowait(update)
     except Exception:
         pass
@@ -128,7 +128,6 @@ async def process_sync_message(message: bytes, ydoc: Doc, websocket, log) -> Non
         YSyncMessageType.SYNC_UPDATE,
     ):
         update = read_message(msg)
-        # Ignore empty updates (see https://github.com/y-crdt/ypy/issues/98)
         if update != b"\x00\x00":
             ydoc.apply_update(update)
 

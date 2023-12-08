@@ -1,13 +1,13 @@
-Ypy-websocket can be installed from [PyPI](https://pypi.org) using `pip` or from [conda-forge](https://conda-forge.org) using `micromamba`.
+Pycrdt-websocket can be installed from [PyPI](https://pypi.org) using `pip` or from [conda-forge](https://conda-forge.org) using `micromamba`.
 
 ## With `pip`
 
 ```console
-pip install ypy-websocket
+pip install pycrdt-websocket
 ```
 
 ## With `micromamba`
 
 ```console
-micromamba install -c conda-forge ypy-websocket
+micromamba install -c conda-forge pycrdt-websocket
 ```

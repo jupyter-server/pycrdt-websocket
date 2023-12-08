@@ -5,15 +5,14 @@ from anyio import Event, create_task_group, move_on_after, sleep
 from pycrdt import Array, Doc, Map
 from websockets import connect  # type: ignore
 
-from ypy_websocket import WebsocketProvider
+from pycrdt_websocket import WebsocketProvider
 
 
 class YTest:
     def __init__(self, ydoc: Doc, timeout: float = 1.0):
         self.ydoc = ydoc
         self.timeout = timeout
-        self.ytest = Map()
-        self.ydoc["_test"] = self.ytest
+        self.ydoc["_test"] = self.ytest = Map()
         self.clock = -1.0
 
     def run_clock(self):
@@ -40,14 +39,13 @@ class YTest:
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("yjs_client", "0", indirect=True)
-async def test_ypy_yjs_0(yws_server, yjs_client):
+async def test_pycrdt_yjs_0(yws_server, yjs_client):
     ydoc = Doc()
     ytest = YTest(ydoc)
     async with connect("ws://127.0.0.1:1234/my-roomname") as websocket, WebsocketProvider(
         ydoc, websocket
     ):
-        ymap = Map()
-        ydoc["map"] = ymap
+        ydoc["map"] = ymap = Map()
         # set a value in "in"
         for v_in in range(10):
             ymap["in"] = float(v_in)
@@ -59,7 +57,7 @@ async def test_ypy_yjs_0(yws_server, yjs_client):
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("yjs_client", "1", indirect=True)
-async def test_ypy_yjs_1(yws_server, yjs_client):
+async def test_pycrdt_yjs_1(yws_server, yjs_client):
     # wait for the JS client to connect
     tt, dt = 0, 0.1
     while True:
@@ -73,9 +71,7 @@ async def test_ypy_yjs_1(yws_server, yjs_client):
     ytest = YTest(ydoc)
     ytest.run_clock()
     await ytest.clock_run()
-    ycells = Array()
-    ystate = Map()
-    ydoc["cells"] = ycells
-    ydoc["state"] = ystate
+    ydoc["cells"] = ycells = Array()
+    ydoc["state"] = ystate = Map()
     assert json.loads(str(ycells)) == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
-    assert json.loads(str(ystate)) == {"state": {"dirty": False}}
+    assert dict(ystate) == {"state": {"dirty": False}}

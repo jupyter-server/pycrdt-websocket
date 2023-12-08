@@ -1,1 +1,1 @@
-::: ypy_websocket.websocket.Websocket
+::: pycrdt_websocket.websocket.Websocket

@@ -82,8 +82,8 @@ class YjsConsumer(AsyncWebsocketConsumer):
     from pycrdt import Doc
     from asgiref.sync import async_to_sync
     from channels.layers import get_channel_layer
-    from ypy_websocket.django_channels_consumer import YjsConsumer
-    from ypy_websocket.yutils import create_update_message
+    from pycrdt_websocket.django_channels_consumer import YjsConsumer
+    from pycrdt_websocket.yutils import create_update_message
 
 
     class DocConsumer(YjsConsumer):

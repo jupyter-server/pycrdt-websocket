@@ -4,7 +4,7 @@ from anyio import create_task_group, sleep
 from pycrdt import Doc, Map
 from websockets import connect  # type: ignore
 
-from ypy_websocket import ASGIServer, WebsocketProvider, WebsocketServer
+from pycrdt_websocket import ASGIServer, WebsocketProvider, WebsocketServer
 
 websocket_server = WebsocketServer(auto_clean_rooms=False)
 app = ASGIServer(websocket_server)
@@ -23,8 +23,7 @@ async def test_asgi(unused_tcp_port):
         # clients
         # client 1
         ydoc1 = Doc()
-        ymap1 = Map()
-        ydoc1["map"] = ymap1
+        ydoc1["map"] = ymap1 = Map()
         ymap1["key"] = "value"
         async with connect(
             f"ws://localhost:{unused_tcp_port}/my-roomname"  # noqa
@@ -38,8 +37,7 @@ async def test_asgi(unused_tcp_port):
         ) as websocket2, WebsocketProvider(ydoc2, websocket2):
             await sleep(0.1)
 
-        ymap2 = Map()
-        ydoc2["map"] = ymap2
+        ydoc2["map"] = ymap2 = Map()
         assert str(ymap2) == '{"key":"value"}'
 
         tg.cancel_scope.cancel()

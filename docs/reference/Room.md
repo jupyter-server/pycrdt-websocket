@@ -1,1 +1,1 @@
-::: ypy_websocket.yroom.YRoom
+::: pycrdt_websocket.yroom.YRoom

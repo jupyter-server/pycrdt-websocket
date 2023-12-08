@@ -7,7 +7,7 @@ from unittest.mock import patch
 import aiosqlite
 import pytest
 
-from ypy_websocket.ystore import SQLiteYStore, TempFileYStore
+from pycrdt_websocket.ystore import SQLiteYStore, TempFileYStore
 
 
 class MetadataCallback:
