@@ -7,7 +7,7 @@ Pycrdt-websocket is an async WebSocket connector for pycrdt.
 
 ---
 
-**Documentation**: <a href="https://jupyter-server.github.io/pycrdt-websocket" target="_blank">https://jupyter-server.github.io/pycrdt-websocket</a>
+**Documentation**: <a href="https://davidbrochart.github.io/pycrdt-websocket" target="_blank">https://davidbrochart.github.io/pycrdt-websocket</a>
 
 **Source Code**: <a href="https://github.com/jupyter-server/pycrdt-websocket" target="_blank">https://github.com/jupyter-server/pycrdt-websocket</a>
 
@@ -18,7 +18,7 @@ It can be used to create collaborative web applications.
 
 The following diagram illustrates a typical architecture. The goal is to share a document among several clients.
 
-Each client has an instance of a [YDoc](https://ypy.readthedocs.io/en/latest/autoapi/y_py/index.html#y_py.YDoc), representing their view of a document. A shared document also lives in a [room](./reference/Room.md) on the server side. Conceptually, a room can be seen as the place where clients collaborate on a document. The WebSocket to which a client connects points to the corresponding room through the endpoint path. In the example below, clients A and B connect to a WebSocket at path `room-1`, and thus both clients find themselves in a room called `room-1`. All the `YDoc` synchronization logic is taken care of by the [WebsocketProvider](./reference/WebSocket_provider.md).
+Each client has an instance of a `Doc`, representing their view of a document. A shared document also lives in a [room](./reference/Room.md) on the server side. Conceptually, a room can be seen as the place where clients collaborate on a document. The WebSocket to which a client connects points to the corresponding room through the endpoint path. In the example below, clients A and B connect to a WebSocket at path `room-1`, and thus both clients find themselves in a room called `room-1`. All the `Doc` synchronization logic is taken care of by the [WebsocketProvider](./reference/WebSocket_provider.md).
 
 Each update to a shared document can be persisted to disk using a [store](./reference/Store.md), which can be a file or a database.
 ```mermaid
