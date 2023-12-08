@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.12.5
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/de210d3a945eebd8cfb7907f7b10265ffc907fe1...5de0c0e3604e3b03ef396af29c0a9dc5f5425ffe))
+
+### Merged PRs
+
+- Replace davidbrochart with jupyter-server [#1](https://github.com/jupyter-server/pycrdt-websocket/pull/1) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2022-04-21&to=2023-12-08&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2022-04-21..2023-12-08&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2022-04-21..2023-12-08&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.12.4
 
 ([Full Changelog](https://github.com/y-crdt/ypy-websocket/compare/v0.12.3...5e95afd99fcc5373591876f2023b975e18fad3cb))
@@ -15,8 +31,6 @@
 ([GitHub contributors page for this release](https://github.com/y-crdt/ypy-websocket/graphs/contributors?from=2023-09-07&to=2023-10-04&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ay-crdt%2Fypy-websocket+involves%3Adavidbrochart+updated%3A2023-09-07..2023-10-04&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.12.3
 
