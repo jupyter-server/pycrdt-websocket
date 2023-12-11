@@ -24,7 +24,6 @@ class YDocNotFound(Exception):
 
 
 class BaseYStore(ABC):
-
     metadata_callback: Callable[[], Awaitable[bytes] | bytes] | None = None
     version = 2
     _started: Event | None = None

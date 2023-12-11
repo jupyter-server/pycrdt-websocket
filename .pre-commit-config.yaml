@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.2.0
+    rev: v4.5.0
     hooks:
       - id: end-of-file-fixer
       - id: check-case-conflict
@@ -17,26 +17,26 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.11.0
     hooks:
       - id: black
         args: ["--line-length", "100"]
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 5.13.0
     hooks:
       - id: isort
         files: \.py$
         args: [--profile=black]
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.32.0
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         args: [--py37-plus]
 
   - repo: https://github.com/PyCQA/doc8
-    rev: 0.11.1
+    rev: v1.1.1
     hooks:
       - id: doc8
         args: [--max-line-length=200]
@@ -44,7 +44,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/john-hen/Flake8-pyproject
-    rev: 1.1.0.post0
+    rev: 1.2.3
     hooks:
       - id: Flake8-pyproject
         alias: flake8
