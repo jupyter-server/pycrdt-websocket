@@ -29,7 +29,6 @@ from .yutils import (
 
 
 class YRoom:
-
     clients: list
     ydoc: Doc
     ystore: BaseYStore | None
