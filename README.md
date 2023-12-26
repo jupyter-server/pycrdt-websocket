@@ -1,5 +1,7 @@
 # Pycrdt-websocket
 
+⚠️ This project is still in an **incubating** phase (i.e. it's not ready for production yet) ⚠️
+
 Pycrdt-websocket is an async WebSocket connector for pycrdt.
 
 [![Build Status](https://github.com/jupyter-server/pycrdt-websocket/workflows/CI/badge.svg)](https://github.com/jupyter-server/pycrdt-websocket/actions)
