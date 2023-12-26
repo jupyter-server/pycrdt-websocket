@@ -2,6 +2,23 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.12.6
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.12.5...b4a55efb4eb3f9fc5191c18cbcb627129677fb10))
+
+### Merged PRs
+
+- Update pycrdt v0.8 [#7](https://github.com/jupyter-server/pycrdt-websocket/pull/7) ([@davidbrochart](https://github.com/davidbrochart))
+- Fix README [#2](https://github.com/jupyter-server/pycrdt-websocket/pull/2) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2023-12-08&to=2023-12-26&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2023-12-08..2023-12-26&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2023-12-08..2023-12-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2023-12-08..2023-12-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.12.5
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/de210d3a945eebd8cfb7907f7b10265ffc907fe1...5de0c0e3604e3b03ef396af29c0a9dc5f5425ffe))
@@ -15,8 +32,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2022-04-21&to=2023-12-08&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2022-04-21..2023-12-08&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2022-04-21..2023-12-08&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.12.4
 
