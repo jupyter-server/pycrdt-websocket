@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from anyio import Event, create_task_group, move_on_after, sleep
 from pycrdt import Array, Doc, Map
@@ -73,5 +71,5 @@ async def test_pycrdt_yjs_1(yws_server, yjs_client):
     await ytest.clock_run()
     ydoc["cells"] = ycells = Array()
     ydoc["state"] = ystate = Map()
-    assert json.loads(str(ycells)) == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
-    assert dict(ystate) == {"state": {"dirty": False}}
+    assert ycells.to_py() == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
+    assert ystate.to_py() == {"state": {"dirty": False}}
