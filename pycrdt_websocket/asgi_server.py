@@ -56,8 +56,9 @@ class ASGIServer:
     def __init__(
         self,
         websocket_server: WebsocketServer,
-        on_connect: Callable[[dict[str, Any], dict[str, Any]], Awaitable[bool] | bool]
-        | None = None,
+        on_connect: (
+            Callable[[dict[str, Any], dict[str, Any]], Awaitable[bool] | bool] | None
+        ) = None,
         on_disconnect: Callable[[dict[str, Any]], Awaitable[None] | None] | None = None,
     ):
         """Initialize the object.

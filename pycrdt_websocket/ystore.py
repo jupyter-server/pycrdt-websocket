@@ -33,16 +33,13 @@ class BaseYStore(ABC):
     @abstractmethod
     def __init__(
         self, path: str, metadata_callback: Callable[[], Awaitable[bytes] | bytes] | None = None
-    ):
-        ...
+    ): ...
 
     @abstractmethod
-    async def write(self, data: bytes) -> None:
-        ...
+    async def write(self, data: bytes) -> None: ...
 
     @abstractmethod
-    async def read(self) -> AsyncIterator[tuple[bytes, bytes]]:
-        ...
+    async def read(self) -> AsyncIterator[tuple[bytes, bytes]]: ...
 
     @property
     def started(self) -> Event:
@@ -424,7 +421,7 @@ class SQLiteYStore(BaseYStore):
                     async with db.execute(
                         "SELECT yupdate FROM yupdates WHERE path = ?", (self.path,)
                     ) as cursor:
-                        async for update, in cursor:
+                        async for (update,) in cursor:
                             ydoc.apply_update(update)
                     # delete history
                     await db.execute("DELETE FROM yupdates WHERE path = ?", (self.path,))
