@@ -78,7 +78,7 @@ class Decoder:
         if length == 0:
             return b""
         i1 = self.i0 + length
-        message = self.stream[self.i0 : i1]  # noqa
+        message = self.stream[self.i0 : i1]
         self.i0 = i1
         self.length -= length
         return message
@@ -99,7 +99,7 @@ class Decoder:
 
 def put_updates(update_send_stream: MemoryObjectSendStream, event: TransactionEvent) -> None:
     try:
-        update = event.update  # type: ignore
+        update = event.update
         update_send_stream.send_nowait(update)
     except Exception:
         pass

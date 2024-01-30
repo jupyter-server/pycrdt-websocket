@@ -3,7 +3,7 @@ from __future__ import annotations
 from logging import getLogger
 from typing import TypedDict
 
-from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore
+from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore[import-not-found]
 from pycrdt import Doc
 
 from .websocket import Websocket

@@ -80,7 +80,8 @@ class WebsocketServer:
         """
         if self._task_group is None:
             raise RuntimeError(
-                "The WebsocketServer is not running: use `async with websocket_server:` or `await websocket_server.start()`"
+                "The WebsocketServer is not running: use `async with websocket_server:` or "
+                "`await websocket_server.start()`"
             )
 
         if not room.started.is_set():
@@ -137,7 +138,8 @@ class WebsocketServer:
         """
         if self._task_group is None:
             raise RuntimeError(
-                "The WebsocketServer is not running: use `async with websocket_server:` or `await websocket_server.start()`"
+                "The WebsocketServer is not running: use `async with websocket_server:` or "
+                "`await websocket_server.start()`"
             )
 
         async with create_task_group() as tg:

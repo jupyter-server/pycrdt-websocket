@@ -114,7 +114,8 @@ class YRoom:
     def on_message(self, value: Callable[[bytes], Awaitable[bool] | bool] | None):
         """
         Arguments:
-            value: An optional callback to call when a message is received. If the callback returns True, the message is skipped.
+            value: An optional callback to call when a message is received.
+            If the callback returns True, the message is skipped.
         """
         self._on_message = value
 
@@ -221,7 +222,8 @@ class YRoom:
                         )
                         for client in self.clients:
                             self.log.debug(
-                                "Sending Y awareness from client with endpoint %s to client with endpoint: %s",
+                                "Sending Y awareness from client with endpoint "
+                                "%s to client with endpoint: %s",
                                 websocket.path,
                                 client.path,
                             )

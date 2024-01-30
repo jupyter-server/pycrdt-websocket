@@ -41,8 +41,9 @@ class BaseYStore(ABC):
         ...
 
     @abstractmethod
-    async def read(self) -> AsyncIterator[tuple[bytes, bytes]]:
-        ...
+    async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
+        if False:
+            yield
 
     @property
     def started(self) -> Event:
@@ -125,7 +126,7 @@ class BaseYStore(ABC):
         Arguments:
             ydoc: The YDoc on which to apply the updates.
         """
-        async for update, *rest in self.read():  # type: ignore
+        async for update, *rest in self.read():
             ydoc.apply_update(update)
 
 
@@ -179,16 +180,16 @@ class FileYStore(BaseYStore):
                     move_file = True
             if move_file:
                 new_path = await get_new_path(self.path)
-                self.log.warning(f"YStore version mismatch, moving {self.path} to {new_path}")
+                self.log.warning("YStore version mismatch, moving %s to %s", self.path, new_path)
                 await anyio.Path(self.path).rename(new_path)
         if version_mismatch:
             async with await anyio.open_file(self.path, "wb") as f:
-                version_bytes = f"VERSION:{self.version}\n".encode()  # noqa
+                version_bytes = f"VERSION:{self.version}\n".encode()
                 await f.write(version_bytes)
                 offset = len(version_bytes)
         return offset
 
-    async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:  # type: ignore
+    async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
         """Async iterator for reading the store content.
 
         Returns:
@@ -350,7 +351,8 @@ class SQLiteYStore(BaseYStore):
             async with self.lock:
                 async with aiosqlite.connect(self.db_path) as db:
                     cursor = await db.execute(
-                        "SELECT count(name) FROM sqlite_master WHERE type='table' and name='yupdates'"
+                        "SELECT count(name) FROM sqlite_master "
+                        "WHERE type='table' and name='yupdates'"
                     )
                     table_exists = (await cursor.fetchone())[0]
                     if table_exists:
@@ -363,13 +365,14 @@ class SQLiteYStore(BaseYStore):
                         create_db = True
         if move_db:
             new_path = await get_new_path(self.db_path)
-            self.log.warning(f"YStore version mismatch, moving {self.db_path} to {new_path}")
+            self.log.warning("YStore version mismatch, moving %s to %s", self.db_path, new_path)
             await anyio.Path(self.db_path).rename(new_path)
         if create_db:
             async with self.lock:
                 async with aiosqlite.connect(self.db_path) as db:
                     await db.execute(
-                        "CREATE TABLE yupdates (path TEXT NOT NULL, yupdate BLOB, metadata BLOB, timestamp REAL NOT NULL)"
+                        "CREATE TABLE yupdates (path TEXT NOT NULL, yupdate BLOB, "
+                        "metadata BLOB, timestamp REAL NOT NULL)"
                     )
                     await db.execute(
                         "CREATE INDEX idx_yupdates_path_timestamp ON yupdates (path, timestamp)"
@@ -378,7 +381,7 @@ class SQLiteYStore(BaseYStore):
                     await db.commit()
         self.db_initialized.set()
 
-    async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:  # type: ignore
+    async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
         """Async iterator for reading the store content.
 
         Returns:
@@ -412,7 +415,8 @@ class SQLiteYStore(BaseYStore):
             async with aiosqlite.connect(self.db_path) as db:
                 # first, determine time elapsed since last update
                 cursor = await db.execute(
-                    "SELECT timestamp FROM yupdates WHERE path = ? ORDER BY timestamp DESC LIMIT 1",
+                    "SELECT timestamp FROM yupdates WHERE path = ? "
+                    "ORDER BY timestamp DESC LIMIT 1",
                     (self.path,),
                 )
                 row = await cursor.fetchone()
@@ -424,7 +428,7 @@ class SQLiteYStore(BaseYStore):
                     async with db.execute(
                         "SELECT yupdate FROM yupdates WHERE path = ?", (self.path,)
                     ) as cursor:
-                        async for update, in cursor:
+                        async for (update,) in cursor:
                             ydoc.apply_update(update)
                     # delete history
                     await db.execute("DELETE FROM yupdates WHERE path = ?", (self.path,))

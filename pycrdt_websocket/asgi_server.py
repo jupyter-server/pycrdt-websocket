@@ -64,7 +64,8 @@ class ASGIServer:
 
         Arguments:
             websocket_server: An instance of WebsocketServer.
-            on_connect: An optional callback to call when connecting the WebSocket. If the callback returns True, the WebSocket is not accepted.
+            on_connect: An optional callback to call when connecting the WebSocket.
+                If the callback returns True, the WebSocket is not accepted.
             on_disconnect: An optional callback called when disconnecting the WebSocket.
         """
         self._websocket_server = websocket_server

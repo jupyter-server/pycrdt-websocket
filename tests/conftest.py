@@ -2,7 +2,7 @@ import subprocess
 
 import pytest
 from pycrdt import Array, Doc
-from websockets import serve  # type: ignore
+from websockets import serve
 
 from pycrdt_websocket import WebsocketServer
 

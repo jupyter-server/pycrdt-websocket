@@ -30,7 +30,7 @@ classifiers = [
 dependencies = [
     "anyio >=3.6.2,<5",
     "aiosqlite >=0.18.0,<1",
-    "pycrdt >=0.8.1,<0.9.0",
+    "pycrdt >=0.8.7,<0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -66,14 +66,15 @@ include = [
     "/tests",
 ]
 
-[tool.flake8]
-ignore = "E501, W503, E402"
-exclude = [
-    ".github",
-]
-enable-extensions = "G"
-extend-ignore = [
-    "G001", "G002", "G004", "G200", "G201", "G202",
-    # black adds spaces around ':'
-    "E203",
+[tool.ruff]
+line-length = 99
+select = [
+    "ASYNC",        # flake8-async
+    "E", "F", "W",  # default Flake8
+    "G",            # flake8-logging-format
+    "I",            # isort
+    "ISC",          # flake8-implicit-str-concat
+    "PGH",          # pygrep-hooks
+    "RUF100",       # unused noqa (yesqa)
+    "UP",           # pyupgrade
 ]
