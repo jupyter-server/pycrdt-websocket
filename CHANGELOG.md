@@ -2,6 +2,23 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.12.7
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.12.6...ded67cd3e51f7db7ea8b8fb4442366a3f6ea2755))
+
+### Merged PRs
+
+- Switch to ruff-format [#10](https://github.com/jupyter-server/pycrdt-websocket/pull/10) ([@davidbrochart](https://github.com/davidbrochart))
+- Set project status to incubating [#4](https://github.com/jupyter-server/pycrdt-websocket/pull/4) ([@Zsailer](https://github.com/Zsailer))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2023-12-26&to=2024-01-30&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2023-12-26..2024-01-30&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2023-12-26..2024-01-30&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2023-12-26..2024-01-30&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.12.6
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.12.5...b4a55efb4eb3f9fc5191c18cbcb627129677fb10))
@@ -16,8 +33,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2023-12-08&to=2023-12-26&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2023-12-08..2023-12-26&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2023-12-08..2023-12-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2023-12-08..2023-12-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.12.5
 

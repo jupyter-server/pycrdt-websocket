@@ -4,4 +4,4 @@ from .websocket_server import WebsocketServer as WebsocketServer
 from .websocket_server import YRoom as YRoom
 from .yutils import YMessageType as YMessageType
 
-__version__ = "0.12.6"
+__version__ = "0.12.7"
