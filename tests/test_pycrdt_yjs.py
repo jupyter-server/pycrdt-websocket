@@ -1,7 +1,7 @@
 import pytest
 from anyio import Event, create_task_group, move_on_after, sleep
 from pycrdt import Array, Doc, Map
-from websockets import connect  # type: ignore
+from websockets import connect
 
 from pycrdt_websocket import WebsocketProvider
 

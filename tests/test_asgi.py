@@ -2,7 +2,7 @@ import pytest
 import uvicorn
 from anyio import create_task_group, sleep
 from pycrdt import Doc, Map
-from websockets import connect  # type: ignore
+from websockets import connect
 
 from pycrdt_websocket import ASGIServer, WebsocketProvider, WebsocketServer
 
@@ -26,14 +26,14 @@ async def test_asgi(unused_tcp_port):
         ydoc1["map"] = ymap1 = Map()
         ymap1["key"] = "value"
         async with connect(
-            f"ws://localhost:{unused_tcp_port}/my-roomname"  # noqa
+            f"ws://localhost:{unused_tcp_port}/my-roomname"
         ) as websocket1, WebsocketProvider(ydoc1, websocket1):
             await sleep(0.1)
 
         # client 2
         ydoc2 = Doc()
         async with connect(
-            f"ws://localhost:{unused_tcp_port}/my-roomname"  # noqa
+            f"ws://localhost:{unused_tcp_port}/my-roomname"
         ) as websocket2, WebsocketProvider(ydoc2, websocket2):
             await sleep(0.1)
 

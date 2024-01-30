@@ -1,15 +1,11 @@
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
+from typing import Protocol
 
 
 class Websocket(Protocol):
     """WebSocket.
 
-    The Websocket instance can receive messages using an async iterator, until the connection is closed:
+    The Websocket instance can receive messages using an async iterator,
+    until the connection is closed:
     ```py
     async for message in websocket:
         ...
