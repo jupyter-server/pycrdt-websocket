@@ -3,20 +3,20 @@ site_description: Async WebSocket connector for pycrdt
 repo_url: https://github.com/jupyter-server/pycrdt-websocket
 
 theme:
-  name: 'material'
+  name: "material"
   palette:
     - scheme: default
-      primary: 'black'
-      accent: 'black'
+      primary: "black"
+      accent: "black"
       toggle:
-          icon: material/lightbulb-outline
-          name: Switch to dark mode
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
     - scheme: slate
-      primary: 'black'
-      accent: 'black'
+      primary: "black"
+      accent: "black"
       toggle:
-          icon: material/lightbulb
-          name: Switch to light mode
+        icon: material/lightbulb
+        name: Switch to light mode
   features:
     - navigation.instant
     - navigation.top
@@ -27,20 +27,22 @@ theme:
     - content.code.copy
 
 nav:
-- Overview: index.md
-- install.md
-- Usage:
-  - usage/client.md
-  - usage/server.md
-  - usage/WebSocket_API.md
-- Code Reference:
-  - reference/WebSocket_provider.md
-  - reference/WebSocket_server.md
-  - reference/ASGI_server.md
-  - reference/Django_Channels_consumer.md
-  - reference/WebSocket.md
-  - reference/Room.md
-  - reference/Store.md
+  - Overview: index.md
+  - install.md
+  - Usage:
+      - usage/client.md
+      - usage/server.md
+      - usage/WebSocket_API.md
+  - Contributing:
+      - contributing.md
+  - Code Reference:
+      - reference/WebSocket_provider.md
+      - reference/WebSocket_server.md
+      - reference/ASGI_server.md
+      - reference/Django_Channels_consumer.md
+      - reference/WebSocket.md
+      - reference/Room.md
+      - reference/Store.md
 
 markdown_extensions:
   - pymdownx.snippets
@@ -53,5 +55,5 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 plugins:
-- mkdocstrings:
-    default_handler: python
+  - mkdocstrings:
+      default_handler: python
