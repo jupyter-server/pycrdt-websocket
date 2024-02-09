@@ -1,4 +1,5 @@
-The WebSocket object passed to `WebsocketProvider` and `WebsocketServer.serve` must implement the following API, defined as a [protocol class](../../reference/WebSocket):
+The WebSocket object passed to `WebsocketProvider` and `WebsocketServer.serve`
+must implement the following API, defined as a [protocol class](../reference/WebSocket.md):
 
 ```py
 class WebSocket:
