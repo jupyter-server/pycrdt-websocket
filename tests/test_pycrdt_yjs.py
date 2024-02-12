@@ -33,9 +33,9 @@ def callback(change_event, key, event):
 
 
 def watch(ydata, key: str | None = None, timeout: float = 1.0):
-        change_event = Event()
-        sid = ydata.observe(partial(callback, change_event, key))
-        return Change(change_event, timeout, ydata, sid, key)
+    change_event = Event()
+    sid = ydata.observe(partial(callback, change_event, key))
+    return Change(change_event, timeout, ydata, sid, key)
 
 
 @pytest.mark.anyio
