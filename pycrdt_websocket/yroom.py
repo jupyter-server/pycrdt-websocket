@@ -141,7 +141,9 @@ class YRoom:
                 if self.clients:
                     message = create_update_message(update)
                     for client in self.clients:
-                        self.log.debug("Sending Y update to remote client with endpoint: %s", client.path)
+                        self.log.debug(
+                            "Sending Y update to remote client with endpoint: %s", client.path
+                        )
                         self._task_group.start_soon(client.send, message)
                 if self.ystore:
                     self.log.debug("Writing Y update to YStore")
