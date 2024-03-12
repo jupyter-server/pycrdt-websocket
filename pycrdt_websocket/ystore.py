@@ -33,12 +33,10 @@ class BaseYStore(ABC):
     @abstractmethod
     def __init__(
         self, path: str, metadata_callback: Callable[[], Awaitable[bytes] | bytes] | None = None
-    ):
-        ...
+    ): ...
 
     @abstractmethod
-    async def write(self, data: bytes) -> None:
-        ...
+    async def write(self, data: bytes) -> None: ...
 
     @abstractmethod
     async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
