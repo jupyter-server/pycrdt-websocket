@@ -7,7 +7,7 @@ Pycrdt-websocket is an async WebSocket connector for pycrdt.
 
 ---
 
-**Documentation**: <a href="https://davidbrochart.github.io/pycrdt-websocket" target="_blank">https://davidbrochart.github.io/pycrdt-websocket</a>
+**Documentation**: <a href="https://jupyter-server.github.io/pycrdt-websocket" target="_blank">https://jupyter-server.github.io/pycrdt-websocket</a>
 
 **Source Code**: <a href="https://github.com/jupyter-server/pycrdt-websocket" target="_blank">https://github.com/jupyter-server/pycrdt-websocket</a>
 
