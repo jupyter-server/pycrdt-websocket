@@ -29,7 +29,7 @@ classifiers = [
 ]
 dependencies = [
     "anyio >=3.6.2,<5",
-    "aiosqlite >=0.18.0,<1",
+    "sqlite-anyio >=0.2.0,<0.3.0",
     "pycrdt >=0.8.7,<0.9.0",
 ]
 
@@ -68,7 +68,7 @@ include = [
 
 [tool.ruff]
 line-length = 99
-select = [
+lint.select = [
     "ASYNC",        # flake8-async
     "E", "F", "W",  # default Flake8
     "G",            # flake8-logging-format

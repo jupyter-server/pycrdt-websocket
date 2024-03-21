@@ -10,11 +10,11 @@ from logging import Logger, getLogger
 from pathlib import Path
 from typing import AsyncIterator, Awaitable, Callable, cast
 
-import aiosqlite
 import anyio
 from anyio import TASK_STATUS_IGNORED, Event, Lock, create_task_group
 from anyio.abc import TaskGroup, TaskStatus
 from pycrdt import Doc
+from sqlite_anyio import Connection, connect
 
 from .yutils import Decoder, get_new_path, write_var_uint
 
@@ -83,11 +83,12 @@ class BaseYStore(ABC):
         if self._task_group is not None:
             raise RuntimeError("YStore already running")
 
-        self.started.set()
-        self._starting = False
-        task_status.started()
+        async with create_task_group() as self._task_group:
+            self.started.set()
+            self._starting = False
+            task_status.started()
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """Stop the store."""
         if self._task_group is None:
             raise RuntimeError("YStore not running")
@@ -300,6 +301,7 @@ class SQLiteYStore(BaseYStore):
     path: str
     lock: Lock
     db_initialized: Event
+    _db: Connection
 
     def __init__(
         self,
@@ -340,6 +342,12 @@ class SQLiteYStore(BaseYStore):
             self._starting = False
             task_status.started()
 
+    async def stop(self) -> None:
+        """Stop the store."""
+        if self.db_initialized.is_set():
+            await self._db.close()
+        await super().stop()
+
     async def _init_db(self):
         create_db = False
         move_db = False
@@ -347,36 +355,41 @@ class SQLiteYStore(BaseYStore):
             create_db = True
         else:
             async with self.lock:
-                async with aiosqlite.connect(self.db_path) as db:
-                    cursor = await db.execute(
-                        "SELECT count(name) FROM sqlite_master "
-                        "WHERE type='table' and name='yupdates'"
-                    )
-                    table_exists = (await cursor.fetchone())[0]
-                    if table_exists:
-                        cursor = await db.execute("pragma user_version")
-                        version = (await cursor.fetchone())[0]
-                        if version != self.version:
-                            move_db = True
-                            create_db = True
-                    else:
+                db = await connect(self.db_path)
+                cursor = await db.cursor()
+                await cursor.execute(
+                    "SELECT count(name) FROM sqlite_master "
+                    "WHERE type='table' and name='yupdates'"
+                )
+                table_exists = (await cursor.fetchone())[0]
+                if table_exists:
+                    await cursor.execute("pragma user_version")
+                    version = (await cursor.fetchone())[0]
+                    if version != self.version:
+                        move_db = True
                         create_db = True
+                else:
+                    create_db = True
+                await db.close()
         if move_db:
             new_path = await get_new_path(self.db_path)
             self.log.warning("YStore version mismatch, moving %s to %s", self.db_path, new_path)
             await anyio.Path(self.db_path).rename(new_path)
         if create_db:
             async with self.lock:
-                async with aiosqlite.connect(self.db_path) as db:
-                    await db.execute(
-                        "CREATE TABLE yupdates (path TEXT NOT NULL, yupdate BLOB, "
-                        "metadata BLOB, timestamp REAL NOT NULL)"
-                    )
-                    await db.execute(
-                        "CREATE INDEX idx_yupdates_path_timestamp ON yupdates (path, timestamp)"
-                    )
-                    await db.execute(f"PRAGMA user_version = {self.version}")
-                    await db.commit()
+                db = await connect(self.db_path)
+                cursor = await db.cursor()
+                await cursor.execute(
+                    "CREATE TABLE yupdates (path TEXT NOT NULL, yupdate BLOB, "
+                    "metadata BLOB, timestamp REAL NOT NULL)"
+                )
+                await cursor.execute(
+                    "CREATE INDEX idx_yupdates_path_timestamp ON yupdates (path, timestamp)"
+                )
+                await cursor.execute(f"PRAGMA user_version = {self.version}")
+                await db.commit()
+                await db.close()
+        self._db = await connect(self.db_path)
         self.db_initialized.set()
 
     async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
@@ -388,17 +401,17 @@ class SQLiteYStore(BaseYStore):
         await self.db_initialized.wait()
         try:
             async with self.lock:
-                async with aiosqlite.connect(self.db_path) as db:
-                    async with db.execute(
-                        "SELECT yupdate, metadata, timestamp FROM yupdates WHERE path = ?",
-                        (self.path,),
-                    ) as cursor:
-                        found = False
-                        async for update, metadata, timestamp in cursor:
-                            found = True
-                            yield update, metadata, timestamp
-                        if not found:
-                            raise YDocNotFound
+                cursor = await self._db.cursor()
+                await cursor.execute(
+                    "SELECT yupdate, metadata, timestamp FROM yupdates WHERE path = ?",
+                    (self.path,),
+                )
+                found = False
+                for update, metadata, timestamp in await cursor.fetchall():
+                    found = True
+                    yield update, metadata, timestamp
+                if not found:
+                    raise YDocNotFound
         except Exception:
             raise YDocNotFound
 
@@ -410,38 +423,35 @@ class SQLiteYStore(BaseYStore):
         """
         await self.db_initialized.wait()
         async with self.lock:
-            async with aiosqlite.connect(self.db_path) as db:
-                # first, determine time elapsed since last update
-                cursor = await db.execute(
-                    "SELECT timestamp FROM yupdates WHERE path = ? "
-                    "ORDER BY timestamp DESC LIMIT 1",
-                    (self.path,),
-                )
-                row = await cursor.fetchone()
-                diff = (time.time() - row[0]) if row else 0
+            # first, determine time elapsed since last update
+            cursor = await self._db.cursor()
+            await cursor.execute(
+                "SELECT timestamp FROM yupdates WHERE path = ? ORDER BY timestamp DESC LIMIT 1",
+                (self.path,),
+            )
+            row = await cursor.fetchone()
+            diff = (time.time() - row[0]) if row else 0
 
-                if self.document_ttl is not None and diff > self.document_ttl:
-                    # squash updates
-                    ydoc = Doc()
-                    async with db.execute(
-                        "SELECT yupdate FROM yupdates WHERE path = ?", (self.path,)
-                    ) as cursor:
-                        async for (update,) in cursor:
-                            ydoc.apply_update(update)
-                    # delete history
-                    await db.execute("DELETE FROM yupdates WHERE path = ?", (self.path,))
-                    # insert squashed updates
-                    squashed_update = ydoc.get_update()
-                    metadata = await self.get_metadata()
-                    await db.execute(
-                        "INSERT INTO yupdates VALUES (?, ?, ?, ?)",
-                        (self.path, squashed_update, metadata, time.time()),
-                    )
-
-                # finally, write this update to the DB
+            if self.document_ttl is not None and diff > self.document_ttl:
+                # squash updates
+                ydoc = Doc()
+                await cursor.execute("SELECT yupdate FROM yupdates WHERE path = ?", (self.path,))
+                for (update,) in await cursor.fetchall():
+                    ydoc.apply_update(update)
+                # delete history
+                await cursor.execute("DELETE FROM yupdates WHERE path = ?", (self.path,))
+                # insert squashed updates
+                squashed_update = ydoc.get_update()
                 metadata = await self.get_metadata()
-                await db.execute(
+                await cursor.execute(
                     "INSERT INTO yupdates VALUES (?, ?, ?, ?)",
-                    (self.path, data, metadata, time.time()),
+                    (self.path, squashed_update, metadata, time.time()),
                 )
-                await db.commit()
+
+            # finally, write this update to the DB
+            metadata = await self.get_metadata()
+            await cursor.execute(
+                "INSERT INTO yupdates VALUES (?, ?, ?, ?)",
+                (self.path, data, metadata, time.time()),
+            )
+            await self._db.commit()
