@@ -38,9 +38,10 @@ test = [
     "mypy",
     "pre-commit",
     "pytest",
-    "pytest-asyncio",
-    "websockets >=10.0",
-    "uvicorn",
+    "httpx-ws >=0.5.2",
+    "hypercorn >=0.16.0",
+    "trio >=0.25.0",
+    "sniffio",
 ]
 docs = [
     "mkdocs",

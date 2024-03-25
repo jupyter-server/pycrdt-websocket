@@ -4,10 +4,13 @@ from functools import partial
 
 import pytest
 from anyio import Event, fail_after
+from httpx_ws import aconnect_ws
 from pycrdt import Array, Doc, Map
-from websockets import connect
+from utils import Websocket, yjs_client
 
 from pycrdt_websocket import WebsocketProvider
+
+pytestmark = pytest.mark.anyio
 
 
 class Change:
@@ -38,32 +41,32 @@ def watch(ydata, key: str | None = None, timeout: float = 1.0):
     return Change(change_event, timeout, ydata, sid, key)
 
 
-@pytest.mark.anyio
-@pytest.mark.parametrize("yjs_client", "0", indirect=True)
-async def test_pycrdt_yjs_0(yws_server, yjs_client):
-    ydoc = Doc()
-    async with connect("ws://127.0.0.1:1234/my-roomname") as websocket, WebsocketProvider(
-        ydoc, websocket
-    ):
-        ydoc["map"] = ymap = Map()
-        for v_in in range(10):
-            ymap["in"] = float(v_in)
-            v_out = await watch(ymap, "out").wait()
-            assert v_out == v_in + 1.0
+async def test_pycrdt_yjs_0(yws_server):
+    port = yws_server
+    with yjs_client(0, port):
+        ydoc = Doc()
+        async with aconnect_ws(
+            f"http://localhost:{port}/my-roomname"
+        ) as websocket, WebsocketProvider(ydoc, Websocket(websocket, "my-roomname")):
+            ydoc["map"] = ymap = Map()
+            for v_in in range(10):
+                ymap["in"] = float(v_in)
+                v_out = await watch(ymap, "out").wait()
+                assert v_out == v_in + 1.0
 
 
-@pytest.mark.anyio
-@pytest.mark.parametrize("yjs_client", "1", indirect=True)
-async def test_pycrdt_yjs_1(yws_server, yjs_client):
-    ydoc = Doc()
-    ydoc["cells"] = ycells = Array()
-    ydoc["state"] = ystate = Map()
-    ycells_change = watch(ycells)
-    ystate_change = watch(ystate)
-    async with connect("ws://127.0.0.1:1234/my-roomname") as websocket, WebsocketProvider(
-        ydoc, websocket
-    ):
-        await ycells_change.wait()
-        await ystate_change.wait()
-        assert ycells.to_py() == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
-        assert ystate.to_py() == {"state": {"dirty": False}}
+async def test_pycrdt_yjs_1(yws_server):
+    port = yws_server
+    with yjs_client(1, port):
+        ydoc = Doc()
+        ydoc["cells"] = ycells = Array()
+        ydoc["state"] = ystate = Map()
+        ycells_change = watch(ycells)
+        ystate_change = watch(ystate)
+        async with aconnect_ws(
+            f"http://localhost:{port}/my-roomname"
+        ) as websocket, WebsocketProvider(ydoc, Websocket(websocket, "my-roomname")):
+            await ycells_change.wait()
+            await ystate_change.wait()
+            assert ycells.to_py() == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
+            assert ystate.to_py() == {"state": {"dirty": False}}

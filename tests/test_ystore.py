@@ -9,6 +9,8 @@ from sqlite_anyio import connect
 
 from pycrdt_websocket.ystore import SQLiteYStore, TempFileYStore
 
+pytestmark = pytest.mark.anyio
+
 
 class MetadataCallback:
     def __init__(self):
@@ -37,7 +39,6 @@ class MySQLiteYStore(SQLiteYStore):
         super().__init__(*args, **kwargs)
 
 
-@pytest.mark.anyio
 @pytest.mark.parametrize("YStore", (MyTempFileYStore, MySQLiteYStore))
 async def test_ystore(YStore):
     store_name = "my_store"
@@ -62,7 +63,6 @@ async def test_ystore(YStore):
     await ystore.stop()
 
 
-@pytest.mark.anyio
 async def test_document_ttl_sqlite_ystore(test_ydoc):
     store_name = "my_store"
     ystore = MySQLiteYStore(store_name, delete_db=True)
@@ -91,7 +91,6 @@ async def test_document_ttl_sqlite_ystore(test_ydoc):
     await ystore.stop()
 
 
-@pytest.mark.anyio
 @pytest.mark.parametrize("YStore", (MyTempFileYStore, MySQLiteYStore))
 async def test_version(YStore, caplog):
     store_name = "my_store"
