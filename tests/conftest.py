@@ -1,10 +1,14 @@
-import subprocess
+from functools import partial
+from socket import socket
 
 import pytest
+from anyio import Event, create_task_group
+from hypercorn import Config
 from pycrdt import Array, Doc
-from websockets import serve
+from sniffio import current_async_library
+from utils import ensure_server_running
 
-from pycrdt_websocket import WebsocketServer
+from pycrdt_websocket import ASGIServer, WebsocketServer
 
 
 class TestYDoc:
@@ -23,25 +27,30 @@ class TestYDoc:
 
 
 @pytest.fixture
-async def yws_server(request):
+async def yws_server(request, unused_tcp_port):
     try:
         kwargs = request.param
-    except Exception:
+    except AttributeError:
         kwargs = {}
     websocket_server = WebsocketServer(**kwargs)
+    app = ASGIServer(websocket_server)
+    config = Config()
+    config.bind = [f"localhost:{unused_tcp_port}"]
+    shutdown_event = Event()
+    if current_async_library() == "trio":
+        from hypercorn.trio import serve
+    else:
+        from hypercorn.asyncio import serve
     try:
-        async with websocket_server, serve(websocket_server.serve, "127.0.0.1", 1234):
-            yield websocket_server
+        async with create_task_group() as tg, websocket_server:
+            tg.start_soon(
+                partial(serve, app, config, shutdown_trigger=shutdown_event.wait, mode="asgi")
+            )
+            await ensure_server_running("localhost", unused_tcp_port)
+            yield unused_tcp_port
+            shutdown_event.set()
     except Exception:
         pass
-
-
-@pytest.fixture
-def yjs_client(request):
-    client_id = request.param
-    p = subprocess.Popen(["node", f"tests/yjs_client_{client_id}.js"])
-    yield p
-    p.kill()
 
 
 @pytest.fixture
@@ -50,5 +59,7 @@ def test_ydoc():
 
 
 @pytest.fixture
-def anyio_backend():
-    return "asyncio"
+def unused_tcp_port() -> int:
+    with socket() as sock:
+        sock.bind(("localhost", 0))
+        return sock.getsockname()[1]

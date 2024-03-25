@@ -4,10 +4,12 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
-import aiosqlite
 import pytest
+from sqlite_anyio import connect
 
 from pycrdt_websocket.ystore import SQLiteYStore, TempFileYStore
+
+pytestmark = pytest.mark.anyio
 
 
 class MetadataCallback:
@@ -37,7 +39,6 @@ class MySQLiteYStore(SQLiteYStore):
         super().__init__(*args, **kwargs)
 
 
-@pytest.mark.anyio
 @pytest.mark.parametrize("YStore", (MyTempFileYStore, MySQLiteYStore))
 async def test_ystore(YStore):
     store_name = "my_store"
@@ -59,34 +60,37 @@ async def test_ystore(YStore):
 
     assert i == len(data)
 
+    await ystore.stop()
 
-@pytest.mark.anyio
+
 async def test_document_ttl_sqlite_ystore(test_ydoc):
     store_name = "my_store"
     ystore = MySQLiteYStore(store_name, delete_db=True)
     await ystore.start()
     now = time.time()
+    db = await connect(ystore.db_path)
+    cursor = await db.cursor()
 
     for i in range(3):
         # assert that adding a record before document TTL doesn't delete document history
         with patch("time.time") as mock_time:
             mock_time.return_value = now
             await ystore.write(test_ydoc.update())
-            async with aiosqlite.connect(ystore.db_path) as db:
-                assert (await (await db.execute("SELECT count(*) FROM yupdates")).fetchone())[
-                    0
-                ] == i + 1
+            assert (await (await cursor.execute("SELECT count(*) FROM yupdates")).fetchone())[
+                0
+            ] == i + 1
 
     # assert that adding a record after document TTL deletes previous document history
     with patch("time.time") as mock_time:
         mock_time.return_value = now + ystore.document_ttl + 1
         await ystore.write(test_ydoc.update())
-        async with aiosqlite.connect(ystore.db_path) as db:
-            # two updates in DB: one squashed update and the new update
-            assert (await (await db.execute("SELECT count(*) FROM yupdates")).fetchone())[0] == 2
+        # two updates in DB: one squashed update and the new update
+        assert (await (await cursor.execute("SELECT count(*) FROM yupdates")).fetchone())[0] == 2
+
+    await db.close()
+    await ystore.stop()
 
 
-@pytest.mark.anyio
 @pytest.mark.parametrize("YStore", (MyTempFileYStore, MySQLiteYStore))
 async def test_version(YStore, caplog):
     store_name = "my_store"
@@ -97,3 +101,4 @@ async def test_version(YStore, caplog):
     await ystore.write(b"foo")
     YStore.version = prev_version
     assert "YStore version mismatch" in caplog.text
+    await ystore.stop()

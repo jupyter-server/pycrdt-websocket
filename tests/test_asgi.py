@@ -1,43 +1,32 @@
 import pytest
-import uvicorn
-from anyio import create_task_group, sleep
+from anyio import sleep
+from httpx_ws import aconnect_ws
 from pycrdt import Doc, Map
-from websockets import connect
+from utils import Websocket
 
-from pycrdt_websocket import ASGIServer, WebsocketProvider, WebsocketServer
+from pycrdt_websocket import WebsocketProvider
 
-websocket_server = WebsocketServer(auto_clean_rooms=False)
-app = ASGIServer(websocket_server)
+pytestmark = pytest.mark.anyio
 
 
-@pytest.mark.anyio
-async def test_asgi(unused_tcp_port):
-    # server
-    config = uvicorn.Config("test_asgi:app", port=unused_tcp_port, log_level="info")
-    server = uvicorn.Server(config)
-    async with create_task_group() as tg, websocket_server:
-        tg.start_soon(server.serve)
-        while not server.started:
-            await sleep(0)
+@pytest.mark.parametrize("yws_server", [{"auto_clean_rooms": False}], indirect=True)
+async def test_asgi(yws_server):
+    port = yws_server
+    # client 1
+    ydoc1 = Doc()
+    ydoc1["map"] = ymap1 = Map()
+    ymap1["key"] = "value"
+    async with aconnect_ws(
+        f"http://localhost:{port}/my-roomname"
+    ) as websocket1, WebsocketProvider(ydoc1, Websocket(websocket1, "my-roomname")):
+        await sleep(0.1)
 
-        # clients
-        # client 1
-        ydoc1 = Doc()
-        ydoc1["map"] = ymap1 = Map()
-        ymap1["key"] = "value"
-        async with connect(
-            f"ws://localhost:{unused_tcp_port}/my-roomname"
-        ) as websocket1, WebsocketProvider(ydoc1, websocket1):
-            await sleep(0.1)
+    # client 2
+    ydoc2 = Doc()
+    async with aconnect_ws(
+        f"http://localhost:{port}/my-roomname"
+    ) as websocket2, WebsocketProvider(ydoc2, Websocket(websocket2, "my-roomname")):
+        await sleep(0.1)
 
-        # client 2
-        ydoc2 = Doc()
-        async with connect(
-            f"ws://localhost:{unused_tcp_port}/my-roomname"
-        ) as websocket2, WebsocketProvider(ydoc2, websocket2):
-            await sleep(0.1)
-
-        ydoc2["map"] = ymap2 = Map()
-        assert str(ymap2) == '{"key":"value"}'
-
-        tg.cancel_scope.cancel()
+    ydoc2["map"] = ymap2 = Map()
+    assert str(ymap2) == '{"key":"value"}'
