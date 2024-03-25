@@ -148,10 +148,9 @@ async def get_new_path(path: str) -> str:
     ext = p.suffix
     p_noext = p.with_suffix("")
     i = 1
-    dir_list = [p async for p in anyio.Path().iterdir()]
     while True:
         new_path = f"{p_noext}({i}){ext}"
-        if new_path not in dir_list:
+        if not await anyio.Path(new_path).exists():
             break
         i += 1
-    return str(new_path)
+    return new_path
