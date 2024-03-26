@@ -9,12 +9,13 @@ from typing import Awaitable, Callable
 from anyio import (
     TASK_STATUS_IGNORED,
     Event,
+    Lock,
     create_memory_object_stream,
     create_task_group,
 )
 from anyio.abc import TaskGroup, TaskStatus
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
-from pycrdt import Doc
+from pycrdt import Doc, Subscription
 
 from .awareness import Awareness
 from .websocket import Websocket
@@ -32,13 +33,14 @@ class YRoom:
     clients: list
     ydoc: Doc
     ystore: BaseYStore | None
+    ready_event: Event
     _on_message: Callable[[bytes], Awaitable[bool] | bool] | None
     _update_send_stream: MemoryObjectSendStream
     _update_receive_stream: MemoryObjectReceiveStream
-    _ready: bool
-    _task_group: TaskGroup | None
-    _started: Event | None
-    _starting: bool
+    _task_group: TaskGroup | None = None
+    _started: Event | None = None
+    __start_lock: Lock | None = None
+    _subscription: Subscription | None = None
 
     def __init__(
         self, ready: bool = True, ystore: BaseYStore | None = None, log: Logger | None = None
@@ -55,7 +57,7 @@ class YRoom:
         task = asyncio.create_task(room.start())
         await room.started.wait()
         ...
-        room.stop()
+        await room.stop()
         ```
 
         Arguments:
@@ -68,15 +70,18 @@ class YRoom:
         self._update_send_stream, self._update_receive_stream = create_memory_object_stream(
             max_buffer_size=65536
         )
-        self._ready = False
+        self.ready_event = Event()
         self.ready = ready
         self.ystore = ystore
         self.log = log or getLogger(__name__)
         self.clients = []
         self._on_message = None
-        self._started = None
-        self._starting = False
-        self._task_group = None
+
+    @property
+    def _start_lock(self) -> Lock:
+        if self.__start_lock is None:
+            self.__start_lock = Lock()
+        return self.__start_lock
 
     @property
     def started(self):
@@ -91,16 +96,19 @@ class YRoom:
         Returns:
             True is the internal YDoc is ready to be synchronized.
         """
-        return self._ready
+        return self.ready_event.is_set()
 
     @ready.setter
     def ready(self, value: bool) -> None:
         """
         Arguments:
             value: True if the internal YDoc is ready to be synchronized, False otherwise."""
-        self._ready = value
-        if value:
-            self.ydoc.observe(partial(put_updates, self._update_send_stream))
+        if value and not self.ready_event.is_set():
+            self.ready_event.set()
+
+    async def _watch_ready(self):
+        await self.ready_event.wait()
+        self._subscription = self.ydoc.observe(partial(put_updates, self._update_send_stream))
 
     @property
     def on_message(self) -> Callable[[bytes], Awaitable[bool] | bool] | None:
@@ -138,53 +146,62 @@ class YRoom:
                     self._task_group.start_soon(self.ystore.write, update)
 
     async def __aenter__(self) -> YRoom:
-        if self._task_group is not None:
-            raise RuntimeError("YRoom already running")
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("YRoom already running")
 
-        async with AsyncExitStack() as exit_stack:
-            tg = create_task_group()
-            self._task_group = await exit_stack.enter_async_context(tg)
-            self._exit_stack = exit_stack.pop_all()
-            tg.start_soon(self._broadcast_updates)
-            self.started.set()
+            async with AsyncExitStack() as exit_stack:
+                tg = create_task_group()
+                self._task_group = await exit_stack.enter_async_context(tg)
+                self._exit_stack = exit_stack.pop_all()
+                await tg.start(partial(self.start, from_context_manager=True))
 
         return self
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
-        if self._task_group is None:
-            raise RuntimeError("YRoom not running")
-
-        self._task_group.cancel_scope.cancel()
-        self._task_group = None
+        await self.stop()
         return await self._exit_stack.__aexit__(exc_type, exc_value, exc_tb)
 
-    async def start(self, *, task_status: TaskStatus[None] = TASK_STATUS_IGNORED):
+    async def start(
+        self,
+        *,
+        task_status: TaskStatus[None] = TASK_STATUS_IGNORED,
+        from_context_manager: bool = False,
+    ):
         """Start the room.
 
         Arguments:
             task_status: The status to set when the task has started.
         """
-        if self._starting:
-            return
-        else:
-            self._starting = True
-
-        if self._task_group is not None:
-            raise RuntimeError("YRoom already running")
-
-        async with create_task_group() as self._task_group:
-            self._task_group.start_soon(self._broadcast_updates)
-            self.started.set()
-            self._starting = False
+        if from_context_manager:
             task_status.started()
+            self.started.set()
+            assert self._task_group is not None
+            self._task_group.start_soon(self._broadcast_updates)
+            return
 
-    def stop(self):
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("YRoom already running")
+
+            async with create_task_group() as self._task_group:
+                task_status.started()
+                self.started.set()
+                self._task_group.start_soon(self._broadcast_updates)
+                self._task_group.start_soon(self._watch_ready)
+
+    async def stop(self) -> None:
         """Stop the room."""
         if self._task_group is None:
             raise RuntimeError("YRoom not running")
 
+        if self._task_group is None:
+            return
+
         self._task_group.cancel_scope.cancel()
         self._task_group = None
+        if self._subscription is not None:
+            self.ydoc.unobserve(self._subscription)
 
     async def serve(self, websocket: Websocket):
         """Serve a client.

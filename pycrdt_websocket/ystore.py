@@ -5,6 +5,7 @@ import tempfile
 import time
 from abc import ABC, abstractmethod
 from contextlib import AsyncExitStack
+from functools import partial
 from inspect import isawaitable
 from logging import Logger, getLogger
 from pathlib import Path
@@ -27,8 +28,8 @@ class BaseYStore(ABC):
     metadata_callback: Callable[[], Awaitable[bytes] | bytes] | None = None
     version = 2
     _started: Event | None = None
-    _starting: bool = False
     _task_group: TaskGroup | None = None
+    __start_lock: Lock | None = None
 
     @abstractmethod
     def __init__(
@@ -49,44 +50,52 @@ class BaseYStore(ABC):
             self._started = Event()
         return self._started
 
-    async def __aenter__(self) -> BaseYStore:
-        if self._task_group is not None:
-            raise RuntimeError("YStore already running")
+    @property
+    def _start_lock(self) -> Lock:
+        if self.__start_lock is None:
+            self.__start_lock = Lock()
+        return self.__start_lock
 
-        async with AsyncExitStack() as exit_stack:
-            tg = create_task_group()
-            self._task_group = await exit_stack.enter_async_context(tg)
-            self._exit_stack = exit_stack.pop_all()
-            tg.start_soon(self.start)
+    async def __aenter__(self) -> BaseYStore:
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("YStore already running")
+
+            async with AsyncExitStack() as exit_stack:
+                tg = create_task_group()
+                self._task_group = await exit_stack.enter_async_context(tg)
+                self._exit_stack = exit_stack.pop_all()
+                await tg.start(partial(self.start, from_context_manager=True))
 
         return self
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
-        if self._task_group is None:
-            raise RuntimeError("YStore not running")
-
-        self._task_group.cancel_scope.cancel()
-        self._task_group = None
+        await self.stop()
         return await self._exit_stack.__aexit__(exc_type, exc_value, exc_tb)
 
-    async def start(self, *, task_status: TaskStatus[None] = TASK_STATUS_IGNORED):
+    async def start(
+        self,
+        *,
+        task_status: TaskStatus[None] = TASK_STATUS_IGNORED,
+        from_context_manager: bool = False,
+    ):
         """Start the store.
 
         Arguments:
             task_status: The status to set when the task has started.
         """
-        if self._starting:
-            return
-        else:
-            self._starting = True
-
-        if self._task_group is not None:
-            raise RuntimeError("YStore already running")
-
-        async with create_task_group() as self._task_group:
-            self.started.set()
-            self._starting = False
+        if from_context_manager:
             task_status.started()
+            self.started.set()
+            return
+
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("YStore already running")
+
+            async with create_task_group() as self._task_group:
+                task_status.started()
+                self.started.set()
 
     async def stop(self) -> None:
         """Stop the store."""
@@ -322,25 +331,33 @@ class SQLiteYStore(BaseYStore):
         self.lock = Lock()
         self.db_initialized = Event()
 
-    async def start(self, *, task_status: TaskStatus[None] = TASK_STATUS_IGNORED):
+    async def start(
+        self,
+        *,
+        task_status: TaskStatus[None] = TASK_STATUS_IGNORED,
+        from_context_manager: bool = False,
+    ):
         """Start the SQLiteYStore.
 
         Arguments:
             task_status: The status to set when the task has started.
         """
-        if self._starting:
-            return
-        else:
-            self._starting = True
 
-        if self._task_group is not None:
-            raise RuntimeError("YStore already running")
-
-        async with create_task_group() as self._task_group:
+        self.db_initialized = Event()
+        if from_context_manager:
+            assert self._task_group is not None
             self._task_group.start_soon(self._init_db)
-            self.started.set()
-            self._starting = False
             task_status.started()
+            self.started.set()
+            return
+
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("YStore already running")
+            async with create_task_group() as self._task_group:
+                self._task_group.start_soon(self._init_db)
+                task_status.started()
+                self.started.set()
 
     async def stop(self) -> None:
         """Stop the store."""
