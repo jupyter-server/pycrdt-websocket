@@ -7,12 +7,13 @@ from logging import Logger, getLogger
 from anyio import (
     TASK_STATUS_IGNORED,
     Event,
+    Lock,
     create_memory_object_stream,
     create_task_group,
 )
 from anyio.abc import TaskGroup, TaskStatus
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
-from pycrdt import Doc
+from pycrdt import Doc, Subscription
 
 from .websocket import Websocket
 from .yutils import (
@@ -30,9 +31,10 @@ class WebsocketProvider:
     _ydoc: Doc
     _update_send_stream: MemoryObjectSendStream
     _update_receive_stream: MemoryObjectReceiveStream
-    _started: Event | None
-    _starting: bool
-    _task_group: TaskGroup | None
+    _subscription: Subscription
+    _started: Event | None = None
+    _task_group: TaskGroup | None = None
+    __start_lock: Lock | None = None
 
     def __init__(self, ydoc: Doc, websocket: Websocket, log: Logger | None = None) -> None:
         """Initialize the object.
@@ -47,7 +49,7 @@ class WebsocketProvider:
         task = asyncio.create_task(websocket_provider.start())
         await websocket_provider.started.wait()
         ...
-        websocket_provider.stop()
+        await websocket_provider.stop()
         ```
 
         Arguments:
@@ -61,10 +63,6 @@ class WebsocketProvider:
         self._update_send_stream, self._update_receive_stream = create_memory_object_stream(
             max_buffer_size=65536
         )
-        self._started = None
-        self._starting = False
-        self._task_group = None
-        ydoc.observe(partial(put_updates, self._update_send_stream))
 
     @property
     def started(self) -> Event:
@@ -73,26 +71,13 @@ class WebsocketProvider:
             self._started = Event()
         return self._started
 
-    async def __aenter__(self) -> WebsocketProvider:
-        if self._task_group is not None:
-            raise RuntimeError("WebsocketProvider already running")
-
-        async with AsyncExitStack() as exit_stack:
-            tg = create_task_group()
-            self._task_group = await exit_stack.enter_async_context(tg)
-            self._exit_stack = exit_stack.pop_all()
-            tg.start_soon(self._run)
-            self.started.set()
-
         return self
 
-    async def __aexit__(self, exc_type, exc_value, exc_tb):
-        if self._task_group is None:
-            raise RuntimeError("WebsocketProvider not running")
-
-        self._task_group.cancel_scope.cancel()
-        self._task_group = None
-        return await self._exit_stack.__aexit__(exc_type, exc_value, exc_tb)
+    @property
+    def _start_lock(self) -> Lock:
+        if self.__start_lock is None:
+            self.__start_lock = Lock()
+        return self.__start_lock
 
     async def _run(self):
         await sync(self._ydoc, self._websocket, self.log)
@@ -110,30 +95,57 @@ class WebsocketProvider:
                 except Exception:
                     pass
 
-    async def start(self, *, task_status: TaskStatus[None] = TASK_STATUS_IGNORED):
+    async def __aenter__(self) -> WebsocketProvider:
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("WebsocketProvider already running")
+
+            async with AsyncExitStack() as exit_stack:
+                tg = create_task_group()
+                self._task_group = await exit_stack.enter_async_context(tg)
+                self._exit_stack = exit_stack.pop_all()
+                await tg.start(partial(self.start, from_context_manager=True))
+
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, exc_tb):
+        await self.stop()
+        return await self._exit_stack.__aexit__(exc_type, exc_value, exc_tb)
+
+    async def start(
+        self,
+        *,
+        task_status: TaskStatus[None] = TASK_STATUS_IGNORED,
+        from_context_manager: bool = False,
+    ):
         """Start the WebSocket provider.
 
         Arguments:
             task_status: The status to set when the task has started.
         """
-        if self._starting:
-            return
-        else:
-            self._starting = True
+        self._subscription = self._ydoc.observe(partial(put_updates, self._update_send_stream))
 
-        if self._task_group is not None:
-            raise RuntimeError("WebsocketProvider already running")
-
-        async with create_task_group() as self._task_group:
-            self._task_group.start_soon(self._run)
-            self.started.set()
-            self._starting = False
+        if from_context_manager:
             task_status.started()
+            self.started.set()
+            assert self._task_group is not None
+            self._task_group.start_soon(self._run)
+            return
 
-    def stop(self):
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("WebsocketProvider already running")
+
+            async with create_task_group() as self._task_group:
+                task_status.started()
+                self.started.set()
+                self._task_group.start_soon(self._run)
+
+    async def stop(self):
         """Stop the WebSocket provider."""
         if self._task_group is None:
             raise RuntimeError("WebsocketProvider not running")
 
         self._task_group.cancel_scope.cancel()
         self._task_group = None
+        self._ydoc.unobserve(self._subscription)
