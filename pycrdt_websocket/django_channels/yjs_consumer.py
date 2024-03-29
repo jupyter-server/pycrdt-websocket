@@ -10,6 +10,7 @@ from pycrdt_websocket.django_channels.yroom_storage import BaseYRoomStorage
 
 from ..websocket import Websocket
 from ..yutils import (
+    EMPTY_UPDATE,
     YMessageType,
     YSyncMessageType,
     process_sync_message,
@@ -198,7 +199,7 @@ class YjsConsumer(AsyncWebsocketConsumer):
         if self.room_storage and bytes_data[1] == YSyncMessageType.SYNC_UPDATE:
             update = read_message(bytes_data[2:])
 
-            if update != b"\x00\x00":
+            if update != EMPTY_UPDATE:
                 await self.room_storage.update_document(update)
 
             return

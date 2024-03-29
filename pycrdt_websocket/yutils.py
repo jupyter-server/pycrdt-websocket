@@ -18,6 +18,8 @@ class YSyncMessageType(IntEnum):
     SYNC_STEP2 = 1
     SYNC_UPDATE = 2
 
+# Empty updates (see https://github.com/y-crdt/ypy/issues/98)
+EMPTY_UPDATE = b"\x00\x00"
 
 def write_var_uint(num: int) -> bytes:
     res = []
@@ -128,7 +130,7 @@ async def process_sync_message(message: bytes, ydoc: Doc, websocket, log) -> Non
         YSyncMessageType.SYNC_UPDATE,
     ):
         update = read_message(msg)
-        if update != b"\x00\x00":
+        if update != EMPTY_UPDATE:
             ydoc.apply_update(update)
 
 
