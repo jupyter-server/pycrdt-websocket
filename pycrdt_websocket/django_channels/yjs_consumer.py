@@ -139,6 +139,9 @@ class YjsConsumer(AsyncWebsocketConsumer):
     def make_room_storage(self) -> BaseYRoomStorage | None:
         """Make the room storage for a new channel to persist the YDoc permanently.
         Defaults to not using any (just broadcast updates between consumers).
+
+        Example:
+            self.room_storage = RedisYRoomStorage(self.room_name)
         """
         return None
 
