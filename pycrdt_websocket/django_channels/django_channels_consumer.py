@@ -6,8 +6,8 @@ from typing import TypedDict
 from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore[import-not-found]
 from pycrdt import Doc
 
-from .websocket import Websocket
-from .yutils import YMessageType, process_sync_message, sync
+from ..websocket import Websocket
+from ..yutils import YMessageType, process_sync_message, sync
 
 logger = getLogger(__name__)
 
