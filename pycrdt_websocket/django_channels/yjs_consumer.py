@@ -79,14 +79,17 @@ class YjsConsumer(AsyncWebsocketConsumer):
     In particular,
 
     - Override `make_room_name` to customize the room name.
-    - Override `make_ydoc` to initialize the YDoc. This is useful to initialize it with data
-      from your database, or to add observers to it).
+    - Override `make_room_storage` to initialize the room storage. Create your own storage class
+      by subclassing `BaseYRoomStorage` and implementing the methods.
     - Override `connect` to do custom validation (like auth) on connect,
       but be sure to call `await super().connect()` in the end.
     - Call `group_send_message` to send a message to an entire group/room.
     - Call `send_message` to send a message to a single client, although this is not recommended.
 
-    A full example of a custom consumer showcasing all of these options is:
+    A full example of a custom consumer showcasing all of these options is below. The example also
+    includes an example function `propagate_document_update_from_external` that demonstrates how to
+    send a message to all connected clients from an external source (like a Celery job).
+
     ```py
     from pycrdt import Doc
     from asgiref.sync import async_to_sync
@@ -96,49 +99,51 @@ class YjsConsumer(AsyncWebsocketConsumer):
 
 
     class DocConsumer(YjsConsumer):
-        def make_room_name(self) -> str:
-            # modify the room name here
-            return self.scope["url_route"]["kwargs"]["room"]
+        def make_room_storage(self) -> BaseYRoomStorage:
+            # Modify the room storage here
 
-        async def make_ydoc(self) -> Doc:
-            doc = Doc()
-            # fill doc with data from DB here
-            doc.observe(self.on_update_event)
-            return doc
+            return RedisYRoomStorage(self.room_name)
+
+        def make_room_name(self) -> str:
+            # Modify the room name here
+
+            return self.scope["url_route"]["kwargs"]["room"]
 
         async def connect(self):
             user = self.scope["user"]
+
             if user is None or user.is_anonymous:
                 await self.close()
                 return
+
             await super().connect()
 
-        def on_update_event(self, event):
-            # process event here
-            ...
-
-        async def doc_update(self, update_wrapper):
+        async def propagate_document_update(self, update_wrapper):
             update = update_wrapper["update"]
-            self.ydoc.apply_update(update)
-            await self.group_send_message(create_update_message(update))
+
+            await self.send(create_update_message(update))
 
 
-    def send_doc_update(room_name, update):
-        layer = get_channel_layer()
-        async_to_sync(layer.group_send)(room_name, {"type": "doc_update", "update": update})
+    async def propagate_document_update_from_external(room_name, update):
+        channel_layer = get_channel_layer()
+
+        await channel_layer.group_send(
+            room_name,
+            {"type": "propagate_document_update", "update": update},
+        )
     ```
-
     """
 
     def __init__(self):
         super().__init__()
-        self.room_name = None
-        self.ydoc = None
-        self._websocket_shim = None
+        self.room_name: str | None = None
+        self.ydoc: Doc | None = None
         self.room_storage: BaseYRoomStorage | None = None
+        self._websocket_shim: _WebsocketShim | None = None
 
     def make_room_storage(self) -> BaseYRoomStorage | None:
         """Make the room storage for a new channel to persist the YDoc permanently.
+
         Defaults to not using any (just broadcast updates between consumers).
 
         Example:
