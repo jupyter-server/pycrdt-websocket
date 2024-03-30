@@ -136,10 +136,10 @@ class YjsConsumer(AsyncWebsocketConsumer):
 
     def __init__(self):
         super().__init__()
-        self.room_name: str | None = None
-        self.ydoc: Doc | None = None
-        self.room_storage: BaseYRoomStorage | None = None
-        self._websocket_shim: _WebsocketShim | None = None
+        self.room_name = None
+        self.ydoc = None
+        self.room_storage = None
+        self._websocket_shim = None
 
     def make_room_storage(self) -> BaseYRoomStorage | None:
         """Make the room storage for a new channel to persist the YDoc permanently.
