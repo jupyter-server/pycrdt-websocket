@@ -1,4 +1,3 @@
-import time
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -55,10 +54,8 @@ class BaseYRoomStorage(ABC):
     ```
     """
 
-    def __init__(self, room_name: str, save_throttle_interval: int | None) -> None:
+    def __init__(self, room_name: str) -> None:
         self.room_name = room_name
-        self.save_throttle_interval = save_throttle_interval
-        self.last_saved_at = time.time()
 
     @abstractmethod
     async def get_document(self) -> Doc:
@@ -95,15 +92,10 @@ class BaseYRoomStorage(ABC):
         """Saves the document encoded as update to the database."""
         ...
 
-    async def throttled_save_snapshot(self) -> None:
-        """Saves the document encoded as update to the database, throttled."""
+    async def close(self) -> None:
+        """Closes the storage connection.
 
-        if (
-            not self.save_throttle_interval
-            or time.time() - self.last_saved_at <= self.save_throttle_interval
-        ):
-            return
-
-        await self.save_snapshot()
-
-        self.last_saved_at = time.time()
+        Useful for cleaning up resources like closing a database
+        connection or saving the document before exiting.
+        """
+        pass

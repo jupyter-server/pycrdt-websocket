@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 
 import redis.asyncio as redis
@@ -14,7 +15,10 @@ class RedisYRoomStorage(BaseYRoomStorage):
     """
 
     def __init__(self, room_name: str, save_throttle_interval: int | None = None) -> None:
-        super().__init__(room_name, save_throttle_interval)
+        super().__init__(room_name)
+
+        self.save_throttle_interval = save_throttle_interval
+        self.last_saved_at = time.time()
 
         self.redis_key = f"document:{self.room_name}"
         self.redis = self._make_redis()
@@ -64,8 +68,21 @@ class RedisYRoomStorage(BaseYRoomStorage):
     async def load_snapshot(self) -> Optional[bytes]:
         return None
 
-    async def save_snapshot(self) -> Optional[bytes]:
+    async def save_snapshot(self) -> None:
         return None
+
+    async def throttled_save_snapshot(self) -> None:
+        """Saves the document encoded as update to the database, throttled."""
+
+        if (
+            not self.save_throttle_interval
+            or time.time() - self.last_saved_at <= self.save_throttle_interval
+        ):
+            return
+
+        await self.save_snapshot()
+
+        self.last_saved_at = time.time()
 
     async def close(self):
         await self.save_snapshot()
