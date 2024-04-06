@@ -6,7 +6,7 @@ from typing import TypedDict
 from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore[import-not-found]
 from pycrdt import Doc
 
-from pycrdt_websocket.django_channels.yroom_storage import BaseYRoomStorage
+from pycrdt_websocket.django_channels.storage.base_yroom_storage import BaseYRoomStorage
 
 from ..websocket import Websocket
 from ..yutils import (
@@ -96,13 +96,14 @@ class YjsConsumer(AsyncWebsocketConsumer):
     from channels.layers import get_channel_layer
     from pycrdt_websocket.django_channels_consumer import YjsConsumer
     from pycrdt_websocket.yutils import create_update_message
+    from pycrdt_websocket.django_channels.storage.redis_yroom_storage import RedisYRoomStorage
 
 
     class DocConsumer(YjsConsumer):
         def make_room_storage(self) -> BaseYRoomStorage:
             # Modify the room storage here
 
-            return RedisYRoomStorage(self.room_name)
+            return RedisYRoomStorage(room_name=self.room_name)
 
         def make_room_name(self) -> str:
             # Modify the room name here
@@ -147,7 +148,10 @@ class YjsConsumer(AsyncWebsocketConsumer):
         Defaults to not using any (just broadcast updates between consumers).
 
         Example:
-            self.room_storage = RedisYRoomStorage(self.room_name)
+            self.room_storage = YourCustomRedisYRoomStorage(
+                room_name=self.room_name,
+                save_throttle_interval=5
+            )
         """
         return None
 
