@@ -16,6 +16,7 @@ from anyio import (
 from anyio.abc import TaskGroup, TaskStatus
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pycrdt import Doc, Subscription
+from tornado.websocket import WebSocketClosedError
 
 from .awareness import Awareness
 from .websocket import Websocket
@@ -138,12 +139,24 @@ class YRoom:
                 # broadcast internal ydoc's update to all clients, that includes changes from the
                 # clients and changes from the backend (out-of-band changes)
                 for client in self.clients:
-                    self.log.debug("Sending Y update to client with endpoint: %s", client.path)
-                    message = create_update_message(update)
-                    self._task_group.start_soon(client.send, message)
+                    try:
+                        self.log.debug("Sending Y update to client with endpoint: %s", client.path)
+                        message = create_update_message(update)
+                        self._task_group.start_soon(client.send, message)
+                    except Exception as e:
+                        self.log.error(
+                             "Error sending Y update to client with endpoint: %s",
+                             client.path,
+                             exc_info=e,
+                         )
+                        if isinstance(e, WebSocketClosedError):
+                            self.client.remove(client)
                 if self.ystore:
-                    self.log.debug("Writing Y update to YStore")
-                    self._task_group.start_soon(self.ystore.write, update)
+                    try:
+                        self._task_group.start_soon(self.ystore.write, update)
+                        self.log.debug("Writing Y update to YStore")
+                    except Exception as e:
+                        self.log.error("Error writing Y update to YStore", exc_info=e)
 
     async def __aenter__(self) -> YRoom:
         async with self._start_lock:
@@ -210,9 +223,9 @@ class YRoom:
             websocket: The WebSocket through which to serve the client.
         """
         async with create_task_group() as tg:
-            self.clients.append(websocket)
-            await sync(self.ydoc, websocket, self.log)
             try:
+                self.clients.append(websocket)
+                await sync(self.ydoc, websocket, self.log)
                 async for message in websocket:
                     # filter messages (e.g. awareness)
                     skip = False
@@ -246,7 +259,9 @@ class YRoom:
                             )
                             tg.start_soon(client.send, message)
             except Exception as e:
-                self.log.debug("Error serving endpoint: %s", websocket.path, exc_info=e)
+                self.log.error("Error serving endpoint: %s", websocket.path, exc_info=e)
+                if isinstance(e, WebSocketClosedError):
+                    raise e
 
             # remove this client
             self.clients = [c for c in self.clients if c != websocket]
