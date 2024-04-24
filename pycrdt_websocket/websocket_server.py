@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from contextlib import AsyncExitStack
+from functools import partial
 from logging import Logger, getLogger
 
-from anyio import TASK_STATUS_IGNORED, Event, create_task_group
+from anyio import TASK_STATUS_IGNORED, Event, Lock, create_task_group
 from anyio.abc import TaskGroup, TaskStatus
 
 from .websocket import Websocket
@@ -15,9 +16,9 @@ class WebsocketServer:
 
     auto_clean_rooms: bool
     rooms: dict[str, YRoom]
-    _started: Event | None
-    _starting: bool
-    _task_group: TaskGroup | None
+    _started: Event | None = None
+    _task_group: TaskGroup | None = None
+    __start_lock: Lock | None = None
 
     def __init__(
         self, rooms_ready: bool = True, auto_clean_rooms: bool = True, log: Logger | None = None
@@ -34,7 +35,7 @@ class WebsocketServer:
         task = asyncio.create_task(websocket_server.start())
         await websocket_server.started.wait()
         ...
-        websocket_server.stop()
+        await websocket_server.stop()
         ```
 
         Arguments:
@@ -46,9 +47,6 @@ class WebsocketServer:
         self.auto_clean_rooms = auto_clean_rooms
         self.log = log or getLogger(__name__)
         self.rooms = {}
-        self._started = None
-        self._starting = False
-        self._task_group = None
 
     @property
     def started(self) -> Event:
@@ -56,6 +54,12 @@ class WebsocketServer:
         if self._started is None:
             self._started = Event()
         return self._started
+
+    @property
+    def _start_lock(self) -> Lock:
+        if self.__start_lock is None:
+            self.__start_lock = Lock()
+        return self.__start_lock
 
     async def get_room(self, name: str) -> YRoom:
         """Get or create a room with the given name, and start it.
@@ -115,12 +119,12 @@ class WebsocketServer:
             from_name = self.get_room_name(from_room)
         self.rooms[to_name] = self.rooms.pop(from_name)
 
-    def delete_room(self, *, name: str | None = None, room: YRoom | None = None) -> None:
+    async def delete_room(self, *, name: str | None = None, room: YRoom | None = None) -> None:
         """Delete a room.
 
         Arguments:
             name: The name of the room to delete (if `room` is not passed).
-            room: The room to delete ( if `name` is not passed).
+            room: The room to delete (if `name` is not passed).
         """
         if name is not None and room is not None:
             raise RuntimeError("Cannot pass name and room")
@@ -128,7 +132,7 @@ class WebsocketServer:
             assert room is not None
             name = self.get_room_name(room)
         room = self.rooms.pop(name)
-        room.stop()
+        await room.stop()
 
     async def serve(self, websocket: Websocket) -> None:
         """Serve a client through a WebSocket.
@@ -151,51 +155,56 @@ class WebsocketServer:
         await room.serve(websocket)
 
         if self.auto_clean_rooms and not room.clients:
-            self.delete_room(room=room)
+            await self.delete_room(room=room)
         tg.cancel_scope.cancel()
 
     async def __aenter__(self) -> WebsocketServer:
-        if self._task_group is not None:
-            raise RuntimeError("WebsocketServer already running")
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("WebsocketServer already running")
 
-        async with AsyncExitStack() as exit_stack:
-            tg = create_task_group()
-            self._task_group = await exit_stack.enter_async_context(tg)
-            self._exit_stack = exit_stack.pop_all()
-            self.started.set()
+            async with AsyncExitStack() as exit_stack:
+                tg = create_task_group()
+                self._task_group = await exit_stack.enter_async_context(tg)
+                self._exit_stack = exit_stack.pop_all()
+                await tg.start(partial(self.start, from_context_manager=True))
 
         return self
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
-        if self._task_group is None:
-            raise RuntimeError("WebsocketServer not running")
-
-        self._task_group.cancel_scope.cancel()
-        self._task_group = None
+        await self.stop()
         return await self._exit_stack.__aexit__(exc_type, exc_value, exc_tb)
 
-    async def start(self, *, task_status: TaskStatus[None] = TASK_STATUS_IGNORED):
+    async def start(
+        self,
+        *,
+        task_status: TaskStatus[None] = TASK_STATUS_IGNORED,
+        from_context_manager: bool = False,
+    ):
         """Start the WebSocket server.
 
         Arguments:
             task_status: The status to set when the task has started.
         """
-        if self._starting:
-            return
-        else:
-            self._starting = True
-
-        if self._task_group is not None:
-            raise RuntimeError("WebsocketServer already running")
-
-        # create the task group and wait forever
-        async with create_task_group() as self._task_group:
-            self._task_group.start_soon(Event().wait)
-            self.started.set()
-            self._starting = False
+        if from_context_manager:
             task_status.started()
+            self.started.set()
+            assert self._task_group is not None
+            # wait forever
+            self._task_group.start_soon(Event().wait)
+            return
 
-    def stop(self) -> None:
+        async with self._start_lock:
+            if self._task_group is not None:
+                raise RuntimeError("WebsocketServer already running")
+
+            async with create_task_group() as self._task_group:
+                task_status.started()
+                self.started.set()
+                # wait forever
+                self._task_group.start_soon(Event().wait)
+
+    async def stop(self) -> None:
         """Stop the WebSocket server."""
         if self._task_group is None:
             raise RuntimeError("WebsocketServer not running")
