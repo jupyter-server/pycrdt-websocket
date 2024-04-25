@@ -21,7 +21,11 @@ class WebsocketServer:
     __start_lock: Lock | None = None
 
     def __init__(
-        self, rooms_ready: bool = True, auto_clean_rooms: bool = True, log: Logger | None = None
+        self,
+        rooms_ready: bool = True,
+        auto_clean_rooms: bool = True,
+        auto_restart: bool = False,
+        log: Logger | None = None,
     ) -> None:
         """Initialize the object.
 
@@ -41,10 +45,12 @@ class WebsocketServer:
         Arguments:
             rooms_ready: Whether rooms are ready to be synchronized when opened.
             auto_clean_rooms: Whether rooms should be deleted when no client is there anymore.
+            auto_restart: Whether to restart the server if it crashes.
             log: An optional logger.
         """
         self.rooms_ready = rooms_ready
         self.auto_clean_rooms = auto_clean_rooms
+        self.auto_restart = auto_restart
         self.log = log or getLogger(__name__)
         self.rooms = {}
 
@@ -159,6 +165,11 @@ class WebsocketServer:
         tg.cancel_scope.cancel()
 
     async def __aenter__(self) -> WebsocketServer:
+        if self.auto_restart:
+            raise RuntimeError(
+                "WebsocketServer does not support auto-restart when used as a context manager"
+            )
+
         async with self._start_lock:
             if self._task_group is not None:
                 raise RuntimeError("WebsocketServer already running")
@@ -198,11 +209,20 @@ class WebsocketServer:
             if self._task_group is not None:
                 raise RuntimeError("WebsocketServer already running")
 
-            async with create_task_group() as self._task_group:
-                task_status.started()
-                self.started.set()
-                # wait forever
-                self._task_group.start_soon(Event().wait)
+            while True:
+                try:
+                    async with create_task_group() as self._task_group:
+                        if not self.started.is_set():
+                            task_status.started()
+                            self.started.set()
+                        # wait forever
+                        self._task_group.start_soon(Event().wait)
+                    break
+                except Exception as e:
+                    if not self.auto_restart:
+                        raise e
+
+                    self.log.error("WebsocketServer crashed, restarting...", exc_info=e)
 
     async def stop(self) -> None:
         """Stop the WebSocket server."""
