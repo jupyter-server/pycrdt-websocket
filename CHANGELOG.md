@@ -2,6 +2,27 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.13.0
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.12.7...3f9cd15b2bec45db9b061f380044dcd1023bf0e3))
+
+### Merged PRs
+
+- Rework how services are started/stopped [#24](https://github.com/jupyter-server/pycrdt-websocket/pull/24) ([@davidbrochart](https://github.com/davidbrochart))
+- Replace aiosqlite with sqlite-anyio [#22](https://github.com/jupyter-server/pycrdt-websocket/pull/22) ([@davidbrochart](https://github.com/davidbrochart))
+- Fix documentation link [#20](https://github.com/jupyter-server/pycrdt-websocket/pull/20) ([@davidbrochart](https://github.com/davidbrochart))
+- Remove warning about project not ready for production [#17](https://github.com/jupyter-server/pycrdt-websocket/pull/17) ([@davidbrochart](https://github.com/davidbrochart))
+- Drop YTest [#14](https://github.com/jupyter-server/pycrdt-websocket/pull/14) ([@davidbrochart](https://github.com/davidbrochart))
+- Add contributing documentation [#12](https://github.com/jupyter-server/pycrdt-websocket/pull/12) ([@dlqqq](https://github.com/dlqqq))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-01-30&to=2024-04-25&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-01-30..2024-04-25&type=Issues) | [@dlqqq](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adlqqq+updated%3A2024-01-30..2024-04-25&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-01-30..2024-04-25&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2024-01-30..2024-04-25&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2024-01-30..2024-04-25&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.12.7
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.12.6...ded67cd3e51f7db7ea8b8fb4442366a3f6ea2755))
@@ -16,8 +37,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2023-12-26&to=2024-01-30&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2023-12-26..2024-01-30&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2023-12-26..2024-01-30&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2023-12-26..2024-01-30&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.12.6
 
