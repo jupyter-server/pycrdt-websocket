@@ -55,7 +55,7 @@ jobs:
           mypy pycrdt_websocket tests
       - name: Run tests
         run: |
-          pytest -v
+          pytest -v --color=yes
 
   check_release:
     runs-on: ubuntu-latest

@@ -44,7 +44,7 @@ async def yws_server(request, unused_tcp_port, websocket_server_api):
                 )
                 await ensure_server_running("localhost", unused_tcp_port)
                 pytest.port = unused_tcp_port
-                yield unused_tcp_port
+                yield unused_tcp_port, websocket_server
                 shutdown_event.set()
     except Exception:
         pass
