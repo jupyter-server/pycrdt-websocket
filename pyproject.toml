@@ -35,7 +35,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "mypy",
+    "mypy !=1.10.0",  # see https://github.com/python/mypy/issues/17166
     "pre-commit",
     "pytest",
     "httpx-ws >=0.5.2",
