@@ -145,10 +145,10 @@ class YRoom:
                         self._task_group.start_soon(client.send, message)
                     except Exception as e:
                         self.log.error(
-                             "Error sending Y update to client with endpoint: %s",
-                             client.path,
-                             exc_info=e,
-                         )
+                            "Error sending Y update to client with endpoint: %s",
+                            client.path,
+                            exc_info=e,
+                        )
                         if isinstance(e, WebSocketClosedError):
                             self.client.remove(client)
                 if self.ystore:
