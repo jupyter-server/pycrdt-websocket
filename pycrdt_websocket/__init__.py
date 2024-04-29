@@ -5,4 +5,4 @@ from .websocket_server import exception_logger as exception_logger
 from .yroom import YRoom as YRoom
 from .yutils import YMessageType as YMessageType
 
-__version__ = "0.13.0"
+__version__ = "0.13.1"
