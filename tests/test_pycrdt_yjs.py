@@ -39,7 +39,7 @@ def watch(ydata, key: str | None = None, timeout: float = 1.0):
 
 @pytest.mark.parametrize("yjs_client", [0], indirect=True)
 async def test_pycrdt_yjs_0(yws_server, yws_provider, yjs_client):
-    ydoc = yws_provider
+    ydoc, _ = yws_provider
     ydoc["map"] = ymap = Map()
     for v_in in range(10):
         ymap["in"] = float(v_in)
@@ -49,7 +49,7 @@ async def test_pycrdt_yjs_0(yws_server, yws_provider, yjs_client):
 
 @pytest.mark.parametrize("yjs_client", [1], indirect=True)
 async def test_pycrdt_yjs_1(yws_server, yws_provider, yjs_client):
-    ydoc = yws_provider
+    ydoc, _ = yws_provider
     ydoc["cells"] = ycells = Array()
     ydoc["state"] = ystate = Map()
     ycells_change = watch(ycells)

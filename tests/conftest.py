@@ -9,13 +9,33 @@ from httpx_ws import aconnect_ws
 from hypercorn import Config
 from pycrdt import Doc
 from sniffio import current_async_library
-from utils import StartStopContextManager, Websocket, ensure_server_running
+from utils import StartStopContextManager, Websocket, connected_websockets, ensure_server_running
 
-from pycrdt_websocket import ASGIServer, WebsocketProvider, WebsocketServer
+from pycrdt_websocket import ASGIServer, WebsocketProvider, WebsocketServer, YRoom
 
 
 @pytest.fixture(params=("websocket_server_context_manager", "websocket_server_start_stop"))
 def websocket_server_api(request):
+    return request.param
+
+
+@pytest.fixture(params=("websocket_provider_context_manager", "websocket_provider_start_stop"))
+def websocket_provider_api(request):
+    return request.param
+
+
+@pytest.fixture(params=("yroom_context_manager", "yroom_start_stop"))
+def yroom_api(request):
+    return request.param
+
+
+@pytest.fixture(params=("real_websocket",))
+def websocket_provider_connect(request):
+    return request.param
+
+
+@pytest.fixture(params=("ystore_context_manager", "ystore_start_stop"))
+def ystore_api(request):
     return request.param
 
 
@@ -50,37 +70,52 @@ async def yws_server(request, unused_tcp_port, websocket_server_api):
         pass
 
 
-@pytest.fixture(params=("websocket_provider_context_manager", "websocket_provider_start_stop"))
-def websocket_provider_api(request):
-    return request.param
-
-
 @pytest.fixture
-def yws_provider_factory(room_name, websocket_provider_api):
+def yws_provider_factory(room_name, websocket_provider_api, websocket_provider_connect):
     @asynccontextmanager
     async def factory():
         ydoc = Doc()
-        async with aconnect_ws(f"http://localhost:{pytest.port}/{room_name}") as websocket:
+        if websocket_provider_connect == "real_websocket":
+            server_websocket = None
+            connect = aconnect_ws(f"http://localhost:{pytest.port}/{room_name}")
+        else:
+            server_websocket, connect = connected_websockets()
+        async with connect as websocket:
             async with create_task_group() as tg:
                 websocket_provider = WebsocketProvider(ydoc, Websocket(websocket, room_name))
                 if websocket_provider_api == "websocket_provider_start_stop":
                     websocket_provider = StartStopContextManager(websocket_provider, tg)
                 async with websocket_provider as websocket_provider:
-                    yield ydoc
+                    yield ydoc, server_websocket
 
     return factory
 
 
 @pytest.fixture
 async def yws_provider(yws_provider_factory):
-    async with yws_provider_factory() as ydoc:
-        yield ydoc
+    async with yws_provider_factory() as provider:
+        ydoc, server_websocket = provider
+        yield ydoc, server_websocket
 
 
 @pytest.fixture
 async def yws_providers(request, yws_provider_factory):
     number = request.param
     yield [yws_provider_factory() for idx in range(number)]
+
+
+@pytest.fixture
+async def yroom(request, yroom_api):
+    async with create_task_group() as tg:
+        try:
+            kwargs = request.param
+        except AttributeError:
+            kwargs = {}
+        room = YRoom(**kwargs)
+        if yroom_api == "yroom_start_stop":
+            room = StartStopContextManager(room, tg)
+        async with room as room:
+            yield room
 
 
 @pytest.fixture
