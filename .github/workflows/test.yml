@@ -55,7 +55,7 @@ jobs:
           mypy pycrdt_websocket tests
       - name: Run tests
         run: |
-          pytest -v --color=yes
+          pytest -v --color=yes --timeout=60
 
   check_release:
     runs-on: ubuntu-latest

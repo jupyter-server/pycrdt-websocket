@@ -38,6 +38,7 @@ test = [
     "mypy !=1.10.0",  # see https://github.com/python/mypy/issues/17166
     "pre-commit",
     "pytest",
+    "pytest-timeout",
     "httpx-ws >=0.5.2",
     "hypercorn >=0.16.0",
     "trio >=0.25.0",

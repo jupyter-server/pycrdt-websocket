@@ -1,4 +1,4 @@
-from anyio import Lock, connect_tcp
+from anyio import Lock, connect_tcp, create_memory_object_stream
 from pycrdt import Array, Doc
 
 
@@ -58,6 +58,45 @@ class Websocket:
     async def recv(self) -> bytes:
         b = await self._websocket.receive_bytes()
         return bytes(b)
+
+
+class ClientWebsocket:
+    def __init__(self, server_websocket: "ServerWebsocket"):
+        self.server_websocket = server_websocket
+        self.send_stream, self.receive_stream = create_memory_object_stream[bytes](65536)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, exc_tb):
+        pass
+
+    async def send_bytes(self, message: bytes) -> None:
+        await self.server_websocket.send_stream.send(message)
+
+    async def receive_bytes(self) -> bytes:
+        return await self.receive_stream.receive()
+
+
+class ServerWebsocket:
+    client_websocket: ClientWebsocket | None = None
+
+    def __init__(self):
+        self.send_stream, self.receive_stream = create_memory_object_stream[bytes](65536)
+
+    async def send_bytes(self, message: bytes) -> None:
+        assert self.client_websocket is not None
+        await self.client_websocket.send_stream.send(message)
+
+    async def receive_bytes(self) -> bytes:
+        return await self.receive_stream.receive()
+
+
+def connected_websockets() -> tuple[ServerWebsocket, ClientWebsocket]:
+    server_websocket = ServerWebsocket()
+    client_websocket = ClientWebsocket(server_websocket)
+    server_websocket.client_websocket = client_websocket
+    return server_websocket, client_websocket
 
 
 async def ensure_server_running(host: str, port: int) -> None:
