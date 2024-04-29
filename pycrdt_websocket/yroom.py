@@ -194,6 +194,9 @@ class YRoom:
         if from_context_manager:
             task_status.started()
             self.started.set()
+            self._update_send_stream, self._update_receive_stream = create_memory_object_stream(
+                max_buffer_size=65536
+            )
             assert self._task_group is not None
             self._task_group.start_soon(self._stopped.wait)
             self._task_group.start_soon(self._watch_ready)
