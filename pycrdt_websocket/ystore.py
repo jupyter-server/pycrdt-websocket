@@ -28,6 +28,7 @@ class BaseYStore(ABC):
     metadata_callback: Callable[[], Awaitable[bytes] | bytes] | None = None
     version = 2
     _started: Event | None = None
+    _stopped: Event | None = None
     _task_group: TaskGroup | None = None
     __start_lock: Lock | None = None
 
@@ -49,6 +50,12 @@ class BaseYStore(ABC):
         if self._started is None:
             self._started = Event()
         return self._started
+
+    @property
+    def stopped(self) -> Event:
+        if self._stopped is None:
+            self._stopped = Event()
+        return self._stopped
 
     @property
     def _start_lock(self) -> Lock:
@@ -96,12 +103,14 @@ class BaseYStore(ABC):
             async with create_task_group() as self._task_group:
                 task_status.started()
                 self.started.set()
+                await self.stopped.wait()
 
     async def stop(self) -> None:
         """Stop the store."""
         if self._task_group is None:
             raise RuntimeError("YStore not running")
 
+        self.stopped.set()
         self._task_group.cancel_scope.cancel()
         self._task_group = None
 
@@ -309,7 +318,7 @@ class SQLiteYStore(BaseYStore):
     document_ttl: int | None = None
     path: str
     lock: Lock
-    db_initialized: Event
+    db_initialized: Event | None
     _db: Connection
 
     def __init__(
@@ -329,6 +338,7 @@ class SQLiteYStore(BaseYStore):
         self.metadata_callback = metadata_callback
         self.log = log or getLogger(__name__)
         self.lock = Lock()
+        self.db_initialized = None
 
     async def start(
         self,
@@ -356,10 +366,11 @@ class SQLiteYStore(BaseYStore):
                 self._task_group.start_soon(self._init_db)
                 task_status.started()
                 self.started.set()
+                await self.stopped.wait()
 
     async def stop(self) -> None:
         """Stop the store."""
-        if hasattr(self, "db_initialized") and self.db_initialized.is_set():
+        if self.db_initialized is not None and self.db_initialized.is_set():
             await self._db.close()
         await super().stop()
 
@@ -405,6 +416,7 @@ class SQLiteYStore(BaseYStore):
                 await db.commit()
                 await db.close()
         self._db = await connect(self.db_path)
+        assert self.db_initialized is not None
         self.db_initialized.set()
 
     async def read(self) -> AsyncIterator[tuple[bytes, bytes, float]]:
@@ -413,8 +425,8 @@ class SQLiteYStore(BaseYStore):
         Returns:
             A tuple of (update, metadata, timestamp) for each update.
         """
-        if not hasattr(self, "db_initialized"):
-            raise RuntimeError("ystore is not started")
+        if self.db_initialized is None:
+            raise RuntimeError("YStore not started")
         await self.db_initialized.wait()
         try:
             async with self.lock:
@@ -438,8 +450,8 @@ class SQLiteYStore(BaseYStore):
         Arguments:
             data: The update to store.
         """
-        if not hasattr(self, "db_initialized"):
-            raise RuntimeError("ystore is not started")
+        if self.db_initialized is None:
+            raise RuntimeError("YStore not started")
         await self.db_initialized.wait()
         async with self.lock:
             # first, determine time elapsed since last update

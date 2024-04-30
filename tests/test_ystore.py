@@ -4,10 +4,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from anyio import create_task_group
+from anyio import create_task_group, sleep
+from pycrdt import Map
 from sqlite_anyio import connect
 from utils import StartStopContextManager, YDocTest
 
+from pycrdt_websocket.websocket_server import exception_logger
+from pycrdt_websocket.yroom import YRoom
 from pycrdt_websocket.ystore import SQLiteYStore, TempFileYStore
 
 pytestmark = pytest.mark.anyio
@@ -124,3 +127,25 @@ async def test_version(YStore, ystore_api, caplog):
         YStore.version = prev_version
         async with ystore as ystore:
             await ystore.write(b"bar")
+
+
+@pytest.mark.parametrize("websocket_server_api", ["websocket_server_start_stop"], indirect=True)
+@pytest.mark.parametrize("yws_server", [{"exception_handler": exception_logger}], indirect=True)
+@pytest.mark.parametrize("YStore", (MyTempFileYStore, MySQLiteYStore))
+async def test_yroom_stop(yws_server, yws_provider, YStore):
+    port, server = yws_server
+    ystore = YStore("ystore", metadata_callback=MetadataCallback())
+    yroom = YRoom(ystore=ystore, exception_handler=exception_logger)
+    yroom.ydoc, _ = yws_provider
+    await server.start_room(yroom)
+    yroom.ydoc["map"] = ymap1 = Map()
+    ymap1["key"] = "value"
+    ymap1["key2"] = "value2"
+    await sleep(1)
+    assert yroom._task_group is not None
+    assert not yroom._task_group.cancel_scope.cancel_called
+    assert ystore._task_group is not None
+    assert not ystore._task_group.cancel_scope.cancel_called
+    await yroom.stop()
+    assert yroom._task_group is None
+    assert ystore._task_group is None
