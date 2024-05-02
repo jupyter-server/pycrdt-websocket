@@ -2,6 +2,24 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.13.2
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.1...8e85b261a65e31aa5a50280e3b65e2be05039ce2))
+
+### Bugs fixed
+
+- fix ystore start flow [#40](https://github.com/jupyter-server/pycrdt-websocket/pull/40) ([@jzhang20133](https://github.com/jzhang20133))
+
+### Maintenance and upkeep improvements
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-04-29&to=2024-05-02&type=c))
+
+[@jzhang20133](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Ajzhang20133+updated%3A2024-04-29..2024-05-02&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-04-29..2024-05-02&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2024-04-29..2024-05-02&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.13.1
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.0...c501156c7c5e6dbb78daf48af97a3a48903c6f06))
@@ -25,8 +43,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-04-25&to=2024-04-29&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-04-25..2024-04-29&type=Issues) | [@jzhang20133](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Ajzhang20133+updated%3A2024-04-25..2024-04-29&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Awelcome+updated%3A2024-04-25..2024-04-29&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2024-04-25..2024-04-29&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.13.0
 
