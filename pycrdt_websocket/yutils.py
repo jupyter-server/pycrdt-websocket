@@ -19,6 +19,9 @@ class YSyncMessageType(IntEnum):
     SYNC_UPDATE = 2
 
 
+EMPTY_UPDATE = b"\x00\x00"
+
+
 def write_var_uint(num: int) -> bytes:
     res = []
     while num > 127:
@@ -100,7 +103,8 @@ class Decoder:
 def put_updates(update_send_stream: MemoryObjectSendStream, event: TransactionEvent) -> None:
     try:
         update = event.update
-        update_send_stream.send_nowait(update)
+        if update != EMPTY_UPDATE:
+            update_send_stream.send_nowait(update)
     except Exception:
         pass
 
@@ -128,7 +132,7 @@ async def process_sync_message(message: bytes, ydoc: Doc, websocket, log) -> Non
         YSyncMessageType.SYNC_UPDATE,
     ):
         update = read_message(msg)
-        if update != b"\x00\x00":
+        if update != EMPTY_UPDATE:
             ydoc.apply_update(update)
 
 
