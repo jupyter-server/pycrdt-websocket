@@ -37,11 +37,11 @@ class YRoom:
     _on_message: Callable[[bytes], Awaitable[bool] | bool] | None
     _update_send_stream: MemoryObjectSendStream
     _update_receive_stream: MemoryObjectReceiveStream
-    _task_group: TaskGroup | None = None
-    _started: Event | None = None
+    _task_group: TaskGroup | None
+    _started: Event | None
     _stopped: Event
-    __start_lock: Lock | None = None
-    _subscription: Subscription | None = None
+    __start_lock: Lock | None
+    _subscription: Subscription | None
 
     def __init__(
         self,
@@ -82,6 +82,10 @@ class YRoom:
         self._on_message = None
         self.exception_handler = exception_handler
         self._stopped = Event()
+        self._task_group = None
+        self._started = None
+        self.__start_lock = None
+        self._subscription = None
 
     @property
     def _start_lock(self) -> Lock:
@@ -230,6 +234,11 @@ class YRoom:
         self._stopped.set()
         self._task_group.cancel_scope.cancel()
         self._task_group = None
+        if self.ystore is not None:
+            try:
+                await self.ystore.stop()
+            except RuntimeError:
+                pass
         if self._subscription is not None:
             self.ydoc.unobserve(self._subscription)
 
