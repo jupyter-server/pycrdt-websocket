@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.13.3
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.2...e13521d503e4858dac4db78d7f61e8010596ad35))
+
+### Enhancements made
+
+- Keep the YStore task group alive [#42](https://github.com/jupyter-server/pycrdt-websocket/pull/42) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-05-02&to=2024-05-06&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-05-02..2024-05-06&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.13.2
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.1...8e85b261a65e31aa5a50280e3b65e2be05039ce2))
@@ -17,8 +33,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-04-29&to=2024-05-02&type=c))
 
 [@jzhang20133](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Ajzhang20133+updated%3A2024-04-29..2024-05-02&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-04-29..2024-05-02&type=Issues) | [@Zsailer](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3AZsailer+updated%3A2024-04-29..2024-05-02&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.13.1
 
