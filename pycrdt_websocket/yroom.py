@@ -134,8 +134,10 @@ class YRoom:
         self._on_message = value
 
     async def _broadcast_updates(self):
-        if self.ystore is not None and not self.ystore.started.is_set():
-            await self._task_group.start(self.ystore.start)
+        if self.ystore is not None:
+            async with self.ystore.start_lock:
+                if not self.ystore.started.is_set():
+                    await self._task_group.start(self.ystore.start)
 
         async with self._update_receive_stream:
             async for update in self._update_receive_stream:
