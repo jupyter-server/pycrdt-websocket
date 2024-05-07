@@ -2,6 +2,24 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.13.4
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.3...63cd8a6ee9ba35a2e15aba89da11e080a480dd58))
+
+### Enhancements made
+
+- Wait for ystore to be started [#43](https://github.com/jupyter-server/pycrdt-websocket/pull/43) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Maintenance and upkeep improvements
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-05-06&to=2024-05-07&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-05-06..2024-05-07&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-05-06..2024-05-07&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.13.3
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.2...e13521d503e4858dac4db78d7f61e8010596ad35))
@@ -15,8 +33,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-05-02&to=2024-05-06&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-05-02..2024-05-06&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.13.2
 
