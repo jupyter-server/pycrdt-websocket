@@ -30,7 +30,8 @@ class BaseYStore(ABC):
     _started: Event | None = None
     _stopped: Event | None = None
     _task_group: TaskGroup | None = None
-    __start_lock: Lock | None = None
+    _public_start_lock: Lock | None = None
+    _private_start_lock: Lock | None = None
 
     @abstractmethod
     def __init__(
@@ -58,10 +59,16 @@ class BaseYStore(ABC):
         return self._stopped
 
     @property
+    def start_lock(self) -> Lock:
+        if self._public_start_lock is None:
+            self._public_start_lock = Lock()
+        return self._public_start_lock
+
+    @property
     def _start_lock(self) -> Lock:
-        if self.__start_lock is None:
-            self.__start_lock = Lock()
-        return self.__start_lock
+        if self._private_start_lock is None:
+            self._private_start_lock = Lock()
+        return self._private_start_lock
 
     async def __aenter__(self) -> BaseYStore:
         async with self._start_lock:
