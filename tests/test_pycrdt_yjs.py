@@ -58,3 +58,18 @@ async def test_pycrdt_yjs_1(yws_server, yws_provider, yjs_client):
     await ystate_change.wait()
     assert ycells.to_py() == [{"metadata": {"foo": "bar"}, "source": "1 + 2"}]
     assert ystate.to_py() == {"state": {"dirty": False}}
+
+
+@pytest.mark.parametrize("yjs_client", [2], indirect=True)
+async def test_pycrdt_yjs_2(yws_server, yws_provider, yjs_client):
+    ydoc, _ = yws_provider
+    ydoc["map0"] = map0 = Map()
+    map0_change = watch(map0)
+    await map0_change.wait()
+    assert map0.get("key0") == "val0"
+    # client is synced, let's make a change
+    map0["key1"] = "val1"
+    # wait for client to undo the change
+    map0_change = watch(map0)
+    await map0_change.wait()
+    assert "key1" not in map0
