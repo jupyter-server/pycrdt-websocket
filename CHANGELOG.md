@@ -2,6 +2,26 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.13.5
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.4...d425e26360a00ff78dda12317756f3578b362c7b))
+
+### Enhancements made
+
+- Use sqlite-anyio's Connection async context manager and exception logger [#51](https://github.com/jupyter-server/pycrdt-websocket/pull/51) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Maintenance and upkeep improvements
+
+- Add undo manager test [#48](https://github.com/jupyter-server/pycrdt-websocket/pull/48) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-05-07&to=2024-06-11&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-05-07..2024-06-11&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-05-07..2024-06-11&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.13.4
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.13.3...63cd8a6ee9ba35a2e15aba89da11e080a480dd58))
@@ -17,8 +37,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-05-06&to=2024-05-07&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-05-06..2024-05-07&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-05-06..2024-05-07&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.13.3
 
