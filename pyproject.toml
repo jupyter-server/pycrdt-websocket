@@ -30,12 +30,12 @@ classifiers = [
 dependencies = [
     "anyio >=3.6.2,<5",
     "sqlite-anyio >=0.2.1,<0.3.0",
-    "pycrdt >=0.8.16,<0.9.0",
+    "pycrdt >=0.8.30,<0.9.0",
 ]
 
 [project.optional-dependencies]
 test = [
-    "mypy !=1.10.0",  # see https://github.com/python/mypy/issues/17166
+    "mypy !=1.10.0,!=1.10.1",  # see https://github.com/python/mypy/issues/17166
     "pre-commit",
     "pytest",
     "pytest-timeout",
