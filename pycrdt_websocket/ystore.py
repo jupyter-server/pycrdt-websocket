@@ -14,10 +14,10 @@ from typing import AsyncIterator, Awaitable, Callable, cast
 import anyio
 from anyio import TASK_STATUS_IGNORED, Event, Lock, create_task_group
 from anyio.abc import TaskGroup, TaskStatus
-from pycrdt import Doc
+from pycrdt import Decoder, Doc, write_var_uint
 from sqlite_anyio import Connection, connect, exception_logger
 
-from .yutils import Decoder, get_new_path, write_var_uint
+from .yutils import get_new_path
 
 
 class YDocNotFound(Exception):

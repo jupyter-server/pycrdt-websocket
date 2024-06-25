@@ -4,10 +4,15 @@ from logging import getLogger
 from typing import TypedDict
 
 from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore[import-not-found]
-from pycrdt import Doc
+from pycrdt import (
+    Doc,
+    YMessageType,
+    YSyncMessageType,
+    create_sync_message,
+    handle_sync_message,
+)
 
 from .websocket import Websocket
-from .yutils import YMessageType, process_sync_message, sync
 
 logger = getLogger(__name__)
 
@@ -83,7 +88,7 @@ class YjsConsumer(AsyncWebsocketConsumer):
     from asgiref.sync import async_to_sync
     from channels.layers import get_channel_layer
     from pycrdt_websocket.django_channels_consumer import YjsConsumer
-    from pycrdt_websocket.yutils import create_update_message
+    from pycrdt import create_update_message
 
 
     class DocConsumer(YjsConsumer):
@@ -159,7 +164,13 @@ class YjsConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_name, self.channel_name)
         await self.accept()
 
-        await sync(self.ydoc, self._websocket_shim, logger)
+        sync_message = create_sync_message(self.ydoc)
+        logger.debug(
+            "Sending %s message to endpoint: %s",
+            YSyncMessageType.SYNC_STEP1.name,
+            self._websocket_shim.path,
+        )
+        await self._websocket_shim.send(sync_message)
 
     async def disconnect(self, code) -> None:
         await self.channel_layer.group_discard(self.room_name, self.channel_name)
@@ -170,7 +181,19 @@ class YjsConsumer(AsyncWebsocketConsumer):
         await self.group_send_message(bytes_data)
         if bytes_data[0] != YMessageType.SYNC:
             return
-        await process_sync_message(bytes_data[1:], self.ydoc, self._websocket_shim, logger)
+        logger.debug(
+            "Received %s message from endpoint: %s",
+            YSyncMessageType(bytes_data[1]).name,
+            self._websocket_shim.path,
+        )
+        reply = handle_sync_message(bytes_data[1:], self.ydoc)
+        if reply is not None:
+            logger.debug(
+                "Sending %s message to endpoint: %s",
+                YSyncMessageType.SYNC_STEP2.name,
+                self._websocket_shim.path,
+            )
+            await self._websocket_shim.send(reply)
 
     class WrappedMessage(TypedDict):
         """A wrapped message to send to the client."""
