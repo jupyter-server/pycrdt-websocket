@@ -32,7 +32,7 @@ from .yutils import put_updates
 
 
 class YRoom:
-    clients: list
+    clients: set[Websocket]
     ydoc: Doc
     ystore: BaseYStore | None
     ready_event: Event
@@ -51,6 +51,7 @@ class YRoom:
         ystore: BaseYStore | None = None,
         exception_handler: Callable[[Exception, Logger], bool] | None = None,
         log: Logger | None = None,
+        ydoc: Doc | None = None,
     ):
         """Initialize the object.
 
@@ -71,16 +72,17 @@ class YRoom:
             ready: Whether the internal YDoc is ready to be synchronized right away.
             ystore: An optional store in which to persist document updates.
             exception_handler: An optional callback to call when an exception is raised, that
-            returns True if the exception was handled.
+                returns True if the exception was handled.
             log: An optional logger.
+            ydoc: An optional document for the room (a new one is created otherwise).
         """
-        self.ydoc = Doc()
+        self.ydoc = Doc() if ydoc is None else ydoc
         self.awareness = Awareness(self.ydoc)
         self.ready_event = Event()
         self.ready = ready
         self.ystore = ystore
         self.log = log or getLogger(__name__)
-        self.clients = []
+        self.clients = set()
         self._on_message = None
         self.exception_handler = exception_handler
         self._stopped = Event()
@@ -147,13 +149,16 @@ class YRoom:
                     return
                 # broadcast internal ydoc's update to all clients, that includes changes from the
                 # clients and changes from the backend (out-of-band changes)
-                for client in self.clients:
-                    try:
-                        self.log.debug("Sending Y update to client with endpoint: %s", client.path)
-                        message = create_update_message(update)
-                        self._task_group.start_soon(client.send, message)
-                    except Exception as exception:
-                        self._handle_exception(exception)
+                if self.clients:
+                    message = create_update_message(update)
+                    for client in self.clients:
+                        try:
+                            self.log.debug(
+                                "Sending Y update to client with endpoint: %s", client.path
+                            )
+                            self._task_group.start_soon(client.send, message)
+                        except Exception as exception:
+                            self._handle_exception(exception)
                 if self.ystore:
                     try:
                         self._task_group.start_soon(self.ystore.write, update)
@@ -245,7 +250,7 @@ class YRoom:
         """
         try:
             async with create_task_group() as tg:
-                self.clients.append(websocket)
+                self.clients.add(websocket)
                 sync_message = create_sync_message(self.ydoc)
                 self.log.debug(
                     "Sending %s message to endpoint: %s",
@@ -296,6 +301,6 @@ class YRoom:
                             )
                             tg.start_soon(client.send, message)
                 # remove this client
-                self.clients = [c for c in self.clients if c != websocket]
+                self.clients.remove(websocket)
         except Exception as exception:
             self._handle_exception(exception)
