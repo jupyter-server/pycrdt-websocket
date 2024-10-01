@@ -77,11 +77,11 @@ class YRoom:
             ydoc: An optional document for the room (a new one is created otherwise).
         """
         self.ydoc = Doc() if ydoc is None else ydoc
-        self.awareness = Awareness(self.ydoc)
         self.ready_event = Event()
         self.ready = ready
         self.ystore = ystore
         self.log = log or getLogger(__name__)
+        self.awareness = Awareness(self.ydoc, self.log, self.local_update_awareness)
         self.clients = set()
         self._on_message = None
         self.exception_handler = exception_handler
@@ -304,3 +304,15 @@ class YRoom:
                 self.clients.remove(websocket)
         except Exception as exception:
             self._handle_exception(exception)
+
+    async def local_update_awareness(self, state):
+        try:
+            async with create_task_group() as tg:
+                for client in self.clients:
+                    self.log.debug(
+                        "Sending awareness from server to client with endpoint: %s",
+                        client.path,
+                    )
+                    tg.start_soon(client.send, state)
+        except Exception as e:
+            self.log.error(f"Error while broadcasting awareness changes: {e}")
