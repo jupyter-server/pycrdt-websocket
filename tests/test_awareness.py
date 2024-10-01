@@ -37,7 +37,7 @@ async def test_awareness_set_local_state_field(yws_provider, websocket_provider_
     ydoc, _ = yws_provider
     awareness = Awareness(ydoc)
 
-    await awareness.set_local_state_field("new_field", "new_value")
+    awareness.set_local_state_field("new_field", "new_value")
     assert awareness.get_local_state() == {"user": DEFAULT_USER, "new_field": "new_value"}
 
 
@@ -109,7 +109,7 @@ async def test_awareness_on_change(yws_provider, websocket_provider_connect):
 
     awareness = Awareness(ydoc, on_change=callback)
 
-    await awareness.set_local_state_field("new_field", "new_value")
+    awareness.set_local_state_field("new_field", "new_value")
 
     assert len(changes) == 1
 
