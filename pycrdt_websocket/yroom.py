@@ -315,4 +315,4 @@ class YRoom:
                     )
                     tg.start_soon(client.send, state)
         except Exception as e:
-            self.log.error(f"Error while broadcasting awareness changes: {e}")
+            self.log.error("Error while broadcasting awareness changes: %s", e)
