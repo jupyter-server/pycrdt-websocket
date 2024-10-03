@@ -16,6 +16,7 @@ from anyio import (
 from anyio.abc import TaskGroup, TaskStatus
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pycrdt import (
+    Awareness,
     Doc,
     Subscription,
     YMessageType,
@@ -25,7 +26,6 @@ from pycrdt import (
     handle_sync_message,
 )
 
-from .awareness import Awareness
 from .websocket import Websocket
 from .ystore import BaseYStore
 from .yutils import put_updates
