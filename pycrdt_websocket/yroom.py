@@ -309,9 +309,7 @@ class YRoom:
         if self._task_group is not None:
             self._task_group.start_soon(self._local_update_awareness, state)
         else:
-            self.log.error(
-                "Cannot broadcast server awareness: YRoom not started"
-            )
+            self.log.error("Cannot broadcast server awareness: YRoom not started")
 
     async def _local_update_awareness(self, state: bytes) -> None:
         try:
