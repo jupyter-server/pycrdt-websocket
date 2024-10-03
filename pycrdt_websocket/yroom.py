@@ -81,7 +81,7 @@ class YRoom:
         self.ready = ready
         self.ystore = ystore
         self.log = log or getLogger(__name__)
-        self.awareness = Awareness(self.ydoc, self.log, self.local_update_awareness)
+        self.awareness = Awareness(self.ydoc, self.local_update_awareness)
         self.clients = set()
         self._on_message = None
         self.exception_handler = exception_handler
