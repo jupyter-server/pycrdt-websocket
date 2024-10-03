@@ -305,7 +305,11 @@ class YRoom:
         except Exception as exception:
             self._handle_exception(exception)
 
-    async def local_update_awareness(self, state):
+    def local_update_awareness(self, state: bytes):
+        if self._task_group is not None:
+            self._task_group.start_soon(self._local_update_awareness, state)
+
+    async def _local_update_awareness(self, state: bytes):
         try:
             async with create_task_group() as tg:
                 for client in self.clients:
