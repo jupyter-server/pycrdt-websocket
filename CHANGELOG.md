@@ -2,6 +2,23 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.14.3
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.14.2...04d5eb3ce82e5677890c88540d8da8f7e3d6821a))
+
+### Maintenance and upkeep improvements
+
+- Remove the awareness in favor of the one from pycrdt [#74](https://github.com/jupyter-server/pycrdt-websocket/pull/74) ([@brichet](https://github.com/brichet))
+- Update GitHub actions [#72](https://github.com/jupyter-server/pycrdt-websocket/pull/72) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-08-29&to=2024-10-04&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Abrichet+updated%3A2024-08-29..2024-10-04&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-08-29..2024-10-04&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-08-29..2024-10-04&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.14.2
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.14.1...713f53930d61d3a8869dbbf75801c0f082b538ff))
@@ -17,8 +34,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-07-05&to=2024-08-29&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-07-05..2024-08-29&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-07-05..2024-08-29&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.14.1
 

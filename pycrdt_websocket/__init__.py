@@ -4,4 +4,4 @@ from .websocket_server import WebsocketServer as WebsocketServer
 from .websocket_server import exception_logger as exception_logger
 from .yroom import YRoom as YRoom
 
-__version__ = "0.14.2"
+__version__ = "0.14.3"
