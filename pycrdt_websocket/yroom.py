@@ -306,6 +306,9 @@ class YRoom:
             self._handle_exception(exception)
 
     def local_update_awareness(self, state: bytes) -> None:
+        """
+        Callback to broadcast the server awareness to clients.
+        """
         if self._task_group is not None:
             self._task_group.start_soon(self._local_update_awareness, state)
         else:
