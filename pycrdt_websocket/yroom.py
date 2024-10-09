@@ -307,7 +307,7 @@ class YRoom:
         except Exception as exception:
             self._handle_exception(exception)
 
-    def local_update_awareness(self, type: str, changes: dict[str, Any]) -> None:
+    def local_update_awareness(self, type: str, changes: tuple[dict[str, Any], Any]) -> None:
         """
         Callback to broadcast the server awareness to clients.
         """
