@@ -25,6 +25,7 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
+    read_message,
 )
 
 from .websocket import Websocket
@@ -302,6 +303,8 @@ class YRoom:
                                 client.path,
                             )
                             tg.start_soon(client.send, message)
+                        # apply awareness update to the server's awareness
+                        self.awareness.apply_awareness_update(read_message(message[1:]), self)
                 # remove this client
                 self.clients.remove(websocket)
         except Exception as exception:
