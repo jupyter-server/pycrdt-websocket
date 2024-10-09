@@ -83,7 +83,7 @@ class YRoom:
         self.ystore = ystore
         self.log = log or getLogger(__name__)
         self.awareness = Awareness(self.ydoc)
-        self.awareness.observe(self.local_update_awareness)
+        self.awareness.observe(self.send_server_awareness)
         self.clients = set()
         self._on_message = None
         self.exception_handler = exception_handler
@@ -307,18 +307,15 @@ class YRoom:
         except Exception as exception:
             self._handle_exception(exception)
 
-    def local_update_awareness(self, type: str, changes: tuple[dict[str, Any], Any]) -> None:
+    def send_server_awareness(self, type: str, changes: tuple[dict[str, Any], Any]) -> None:
         """
         Callback to broadcast the server awareness to clients.
         """
-        if not changes[1] == "local":
+        if changes[1] != "local":
             return
 
         if self._task_group is not None:
-            updated_clients = [
-                *changes[0].get("added", []),
-                *changes[0].get("filtered_updated", []),
-            ]
+            updated_clients = [v for value in changes[0].values() for v in value]
             state = self.awareness.encode_awareness_update(updated_clients)
             message = create_awareness_message(state)
             self._task_group.start_soon(self._local_update_awareness, message)
