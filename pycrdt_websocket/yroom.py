@@ -311,7 +311,7 @@ class YRoom:
         """
         Callback to broadcast the server awareness to clients.
         """
-        if changes[1] != "local":
+        if type != "change" or changes[1] != "local":
             return
 
         if self._task_group is not None:
