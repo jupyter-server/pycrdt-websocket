@@ -2,6 +2,28 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.15.0
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.14.3...e361683b4752cedce933c362c510e40302865dc4))
+
+### Enhancements made
+
+- Broadcast server awareness to all clients [#73](https://github.com/jupyter-server/pycrdt-websocket/pull/73) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- Apply awareness updates to server awareness [#76](https://github.com/jupyter-server/pycrdt-websocket/pull/76) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Maintenance and upkeep improvements
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-10-04&to=2024-10-09&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Abrichet+updated%3A2024-10-04..2024-10-09&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-10-04..2024-10-09&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-10-04..2024-10-09&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.14.3
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.14.2...04d5eb3ce82e5677890c88540d8da8f7e3d6821a))
@@ -16,8 +38,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-08-29&to=2024-10-04&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Abrichet+updated%3A2024-08-29..2024-10-04&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-08-29..2024-10-04&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-08-29..2024-10-04&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.14.2
 
