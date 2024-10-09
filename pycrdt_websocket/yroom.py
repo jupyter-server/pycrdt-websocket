@@ -4,7 +4,7 @@ from contextlib import AsyncExitStack
 from functools import partial
 from inspect import isawaitable
 from logging import Logger, getLogger
-from typing import Awaitable, Callable
+from typing import Any, Awaitable, Callable
 
 from anyio import (
     TASK_STATUS_IGNORED,
@@ -24,6 +24,7 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
+    create_awareness_message,
 )
 
 from .websocket import Websocket
@@ -81,7 +82,8 @@ class YRoom:
         self.ready = ready
         self.ystore = ystore
         self.log = log or getLogger(__name__)
-        self.awareness = Awareness(self.ydoc, self.local_update_awareness)
+        self.awareness = Awareness(self.ydoc)
+        self.awareness.observe(self.local_update_awareness)
         self.clients = set()
         self._on_message = None
         self.exception_handler = exception_handler
@@ -305,12 +307,21 @@ class YRoom:
         except Exception as exception:
             self._handle_exception(exception)
 
-    def local_update_awareness(self, state: bytes) -> None:
+    def local_update_awareness(self, type: str, changes: dict[str, Any]) -> None:
         """
         Callback to broadcast the server awareness to clients.
         """
+        if not changes[1] == "local":
+            return
+
         if self._task_group is not None:
-            self._task_group.start_soon(self._local_update_awareness, state)
+            updated_clients = [
+                *changes[0].get("added", []),
+                *changes[0].get("filtered_updated", [])
+            ]
+            state = self.awareness.encode_awareness_update(updated_clients)
+            message = create_awareness_message(state)
+            self._task_group.start_soon(self._local_update_awareness, message)
         else:
             self.log.error("Cannot broadcast server awareness: YRoom not started")
 
