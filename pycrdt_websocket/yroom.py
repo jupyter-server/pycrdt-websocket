@@ -21,10 +21,10 @@ from pycrdt import (
     Subscription,
     YMessageType,
     YSyncMessageType,
+    create_awareness_message,
     create_sync_message,
     create_update_message,
     handle_sync_message,
-    create_awareness_message,
 )
 
 from .websocket import Websocket
@@ -317,7 +317,7 @@ class YRoom:
         if self._task_group is not None:
             updated_clients = [
                 *changes[0].get("added", []),
-                *changes[0].get("filtered_updated", [])
+                *changes[0].get("filtered_updated", []),
             ]
             state = self.awareness.encode_awareness_update(updated_clients)
             message = create_awareness_message(state)
