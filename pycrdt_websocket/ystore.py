@@ -9,7 +9,7 @@ from functools import partial
 from inspect import isawaitable
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import AsyncIterator, Awaitable, Callable, cast, Literal
+from typing import AsyncIterator, Awaitable, Callable, Literal, cast
 
 import anyio
 from anyio import TASK_STATUS_IGNORED, Event, Lock, create_task_group
@@ -488,11 +488,14 @@ class SQLiteYStore(BaseYStore):
 
                 squashed = False
                 if (self.document_ttl is not None and newest_diff > self.document_ttl) or (
-                    self.history_length is not None and oldest_diff > self.min_cleanup_interval + self.history_length
+                    self.history_length is not None
+                    and oldest_diff > self.min_cleanup_interval + self.history_length
                 ):
                     # squash updates
                     ydoc = Doc()
-                    older_than = time.time() - self.history_length
+                    older_than = time.time() - (
+                        self.history_length if self.history_length is not None else 0
+                    )
                     await cursor.execute(
                         "SELECT yupdate FROM yupdates WHERE path = ? AND timestamp < ?",
                         (self.path, older_than),
@@ -501,7 +504,8 @@ class SQLiteYStore(BaseYStore):
                         ydoc.apply_update(update)
                     # delete older history
                     await cursor.execute(
-                        "DELETE FROM yupdates WHERE path = ? AND timestamp < ?", (self.path, older_than)
+                        "DELETE FROM yupdates WHERE path = ? AND timestamp < ?",
+                        (self.path, older_than),
                     )
                     # insert squashed updates
                     squashed_update = ydoc.get_update()
@@ -524,10 +528,13 @@ class SQLiteYStore(BaseYStore):
                     await self._db.commit()
                     await cursor.execute("VACUUM")
 
-    async def _get_time_differential_to_entry(self, cursor, direction: Literal["ASC", "DESC"] = "DESC") -> float:
-        """ Get the time differential to the newest (DESC) or oldest (ASC) entry in the database. """
+    async def _get_time_differential_to_entry(
+        self, cursor, direction: Literal["ASC", "DESC"] = "DESC"
+    ) -> float:
+        """Get the time differential to the newest (DESC) or oldest (ASC) entry in the database."""
         await cursor.execute(
-            "SELECT timestamp FROM yupdates WHERE path = ? " f"ORDER BY timestamp {direction} LIMIT 1",
+            "SELECT timestamp FROM yupdates WHERE path = ? "
+            f"ORDER BY timestamp {direction} LIMIT 1",
             (self.path,),
         )
         row = await cursor.fetchone()
