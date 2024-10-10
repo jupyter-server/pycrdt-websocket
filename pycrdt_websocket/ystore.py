@@ -324,7 +324,7 @@ class SQLiteYStore(BaseYStore):
     # Defaults to never purging document history (None).
     document_ttl: int | None = None
     # The maximum length of the history of the documents in seconds that is kept.
-    history_length: int | None = 120
+    history_length: int | None = None
     # The minimum interval in seconds between history cleanup operations.
     min_cleanup_interval: int = 60
     path: str
