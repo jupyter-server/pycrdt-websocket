@@ -213,6 +213,7 @@ class YRoom:
             self._task_group.start_soon(self._stopped.wait)
             self._task_group.start_soon(self._watch_ready)
             self._task_group.start_soon(self._broadcast_updates)
+            self._task_group.start_soon(self.awareness.start)
             return
 
         async with self._start_lock:
@@ -231,8 +232,10 @@ class YRoom:
                         self._task_group.start_soon(self._stopped.wait)
                         self._task_group.start_soon(self._watch_ready)
                         self._task_group.start_soon(self._broadcast_updates)
+                        self._task_group.start_soon(self.awareness.start)
                     return
                 except Exception as exception:
+                    await self.awareness.stop()
                     self._handle_exception(exception)
 
     async def stop(self) -> None:
@@ -240,6 +243,7 @@ class YRoom:
         if self._task_group is None:
             raise RuntimeError("YRoom not running")
         self._stopped.set()
+        await self.awareness.stop()
         self._task_group.cancel_scope.cancel()
         self._task_group = None
         if self._subscription is not None:
