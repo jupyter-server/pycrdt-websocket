@@ -231,6 +231,7 @@ class YRoom:
                         self._task_group.start_soon(self._stopped.wait)
                         self._task_group.start_soon(self._watch_ready)
                         self._task_group.start_soon(self._broadcast_updates)
+                        self._task_group.start_soon(self.awareness.start)
                     return
                 except Exception as exception:
                     self._handle_exception(exception)
