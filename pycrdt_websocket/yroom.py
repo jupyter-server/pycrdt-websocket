@@ -235,6 +235,7 @@ class YRoom:
                         self._task_group.start_soon(self.awareness.start)
                     return
                 except Exception as exception:
+                    await self.awareness.stop()
                     self._handle_exception(exception)
 
     async def stop(self) -> None:
