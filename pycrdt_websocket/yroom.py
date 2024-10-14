@@ -241,6 +241,7 @@ class YRoom:
         if self._task_group is None:
             raise RuntimeError("YRoom not running")
         self._stopped.set()
+        self.awareness.stop()
         self._task_group.cancel_scope.cancel()
         self._task_group = None
         if self._subscription is not None:
