@@ -73,8 +73,6 @@ class WebsocketProvider:
             self._started = Event()
         return self._started
 
-        return self
-
     @property
     def _start_lock(self) -> Lock:
         if self.__start_lock is None:
