@@ -2,6 +2,30 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.15.2
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.1...d208ff03390d17e0dc3e438e39d0af150b3f7d93))
+
+### Bugs fixed
+
+- Remove client on failure [#94](https://github.com/jupyter-server/pycrdt-websocket/pull/94) ([@darabos](https://github.com/darabos))
+
+### Maintenance and upkeep improvements
+
+- Dead code [#89](https://github.com/jupyter-server/pycrdt-websocket/pull/89) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Update client documentation [#91](https://github.com/jupyter-server/pycrdt-websocket/pull/91) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-10-14&to=2024-12-10&type=c))
+
+[@darabos](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adarabos+updated%3A2024-10-14..2024-12-10&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-10-14..2024-12-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Afcollonval+updated%3A2024-10-14..2024-12-10&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-10-14..2024-12-10&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.15.1
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.0...b43acfd307f4af68efc6bc460e9e597748cdf59e))
@@ -15,8 +39,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-10-09&to=2024-10-14&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Abrichet+updated%3A2024-10-09..2024-10-14&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.15.0
 
