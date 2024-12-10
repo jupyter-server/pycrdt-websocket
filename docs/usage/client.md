@@ -1,18 +1,20 @@
 A client connects their `Doc` through a [WebsocketProvider](../reference/WebSocket_provider.md).
 
-Here is a code example using the [websockets](https://websockets.readthedocs.io) library:
+Here is a code example using the [httpx-ws](https://frankie567.github.io/httpx-ws) library:
 ```py
 import asyncio
-from websockets import connect
+from httpx_ws import aconnect_ws
 from pycrdt import Doc, Map
 from pycrdt_websocket import WebsocketProvider
+from pycrdt_websocket.websocket import HttpxWebsocket
 
 async def client():
     ydoc = Doc()
     ymap = ydoc.get("map", type=Map)
+    room_name = "my-roomname"
     async with (
-        connect("ws://localhost:1234/my-roomname") as websocket,
-        WebsocketProvider(ydoc, websocket),
+        aconnect_ws(f"http://localhost:1234/{room_name}") as websocket,
+        WebsocketProvider(ydoc, HttpxWebsocket(websocket, room_name)),
     ):
         # Changes to remote ydoc are applied to local ydoc.
         # Changes to local ydoc are sent over the WebSocket and
