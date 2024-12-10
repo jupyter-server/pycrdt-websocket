@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.15.3
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.2...3a74f65bd4d0e27634ec035699828e1cf80bd036))
+
+### Documentation improvements
+
+- Update client/server examples [#95](https://github.com/jupyter-server/pycrdt-websocket/pull/95) ([@davidbrochart](https://github.com/davidbrochart))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-12-10&to=2024-12-10&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-12-10..2024-12-10&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.15.2
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.1...d208ff03390d17e0dc3e438e39d0af150b3f7d93))
@@ -23,8 +39,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-10-14&to=2024-12-10&type=c))
 
 [@darabos](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adarabos+updated%3A2024-10-14..2024-12-10&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-10-14..2024-12-10&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Afcollonval+updated%3A2024-10-14..2024-12-10&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-10-14..2024-12-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.15.1
 
