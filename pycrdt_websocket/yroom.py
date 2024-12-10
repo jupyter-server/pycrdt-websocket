@@ -309,10 +309,11 @@ class YRoom:
                             tg.start_soon(client.send, message)
                         # apply awareness update to the server's awareness
                         self.awareness.apply_awareness_update(read_message(message[1:]), self)
-                # remove this client
-                self.clients.remove(websocket)
         except Exception as exception:
             self._handle_exception(exception)
+        finally:
+            # remove this client
+            self.clients.remove(websocket)
 
     def send_server_awareness(self, type: str, changes: tuple[dict[str, Any], Any]) -> None:
         """
