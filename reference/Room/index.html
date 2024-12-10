@@ -1192,7 +1192,8 @@
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
-<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">YRoom</span><span class="p">:</span>
+<span class="normal">346</span>
+<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">YRoom</span><span class="p">:</span>
     <span class="n">clients</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Websocket</span><span class="p">]</span>
     <span class="n">ydoc</span><span class="p">:</span> <span class="n">Doc</span>
     <span class="n">ystore</span><span class="p">:</span> <span class="n">BaseYStore</span> <span class="o">|</span> <span class="kc">None</span>
@@ -1468,10 +1469,11 @@
                             <span class="n">tg</span><span class="o">.</span><span class="n">start_soon</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
                         <span class="c1"># apply awareness update to the server&#39;s awareness</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">awareness</span><span class="o">.</span><span class="n">apply_awareness_update</span><span class="p">(</span><span class="n">read_message</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="bp">self</span><span class="p">)</span>
-                <span class="c1"># remove this client</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_handle_exception</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c1"># remove this client</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">send_server_awareness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">changes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1899,8 +1901,7 @@ returns True if the exception was handled.</p>
 
             <details class="quote">
               <summary>Source code in <code>pycrdt_websocket/yroom.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
 <span class="normal">319</span>
 <span class="normal">320</span>
 <span class="normal">321</span>
@@ -1916,7 +1917,8 @@ returns True if the exception was handled.</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">send_server_awareness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">changes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">334</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">send_server_awareness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">changes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Callback to broadcast the server awareness to clients.</span>
 
@@ -2053,7 +2055,8 @@ returns True if the exception was handled.</p>
 <span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
-<span class="normal">315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">serve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">websocket</span><span class="p">:</span> <span class="n">Websocket</span><span class="p">):</span>
+<span class="normal">315</span>
+<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">serve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">websocket</span><span class="p">:</span> <span class="n">Websocket</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Serve a client.</span>
 
 <span class="sd">    Arguments:</span>
@@ -2113,10 +2116,11 @@ returns True if the exception was handled.</p>
                         <span class="n">tg</span><span class="o">.</span><span class="n">start_soon</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
                     <span class="c1"># apply awareness update to the server&#39;s awareness</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">awareness</span><span class="o">.</span><span class="n">apply_awareness_update</span><span class="p">(</span><span class="n">read_message</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="bp">self</span><span class="p">)</span>
-            <span class="c1"># remove this client</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_handle_exception</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># remove this client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">websocket</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

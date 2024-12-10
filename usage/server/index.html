@@ -664,39 +664,23 @@
 
   <h1>Server</h1>
 
-<p>A server connects multiple <code>YDoc</code> through a <a href="../../reference/WebSocket_server/">WebsocketServer</a>.</p>
-<p>Here is a code example using the <a href="https://websockets.readthedocs.io">websockets</a> library:
+<p>A server connects multiple <code>Doc</code> through a <a href="../../reference/WebSocket_server/">WebsocketServer</a>.</p>
+<p>Pycrdt-websocket can be used with an <a href="https://asgi.readthedocs.io">ASGI</a> server. Here is a code example using <a href="https://hypercorn.readthedocs.io">Hypercorn</a>:
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">websockets</span> <span class="kn">import</span> <span class="n">serve</span>
-<span class="kn">from</span> <span class="nn">pycrdt_websocket</span> <span class="kn">import</span> <span class="n">WebsocketServer</span>
-
-<span class="k">async</span> <span class="k">def</span> <span class="nf">server</span><span class="p">():</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="p">(</span>
-        <span class="n">WebsocketServer</span><span class="p">()</span> <span class="k">as</span> <span class="n">websocket_server</span><span class="p">,</span>
-        <span class="n">serve</span><span class="p">(</span><span class="n">websocket_server</span><span class="o">.</span><span class="n">serve</span><span class="p">,</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">1234</span><span class="p">),</span>
-    <span class="p">):</span>
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Future</span><span class="p">()</span>  <span class="c1"># run forever</span>
-
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">server</span><span class="p">())</span>
-</code></pre></div>
-Pycrdt-websocket can also be used with an <a href="https://asgi.readthedocs.io">ASGI</a> server. Here is a code example using <a href="https://www.uvicorn.org">Uvicorn</a>:
-<div class="highlight"><pre><span></span><code><span class="c1"># main.py</span>
-<span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">uvicorn</span>
+<span class="kn">from</span> <span class="nn">hypercorn</span> <span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">hypercorn.asyncio</span> <span class="kn">import</span> <span class="n">serve</span>
 <span class="kn">from</span> <span class="nn">pycrdt_websocket</span> <span class="kn">import</span> <span class="n">ASGIServer</span><span class="p">,</span> <span class="n">WebsocketServer</span>
 
 <span class="n">websocket_server</span> <span class="o">=</span> <span class="n">WebsocketServer</span><span class="p">()</span>
 <span class="n">app</span> <span class="o">=</span> <span class="n">ASGIServer</span><span class="p">(</span><span class="n">websocket_server</span><span class="p">)</span>
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="n">uvicorn</span><span class="o">.</span><span class="n">Config</span><span class="p">(</span><span class="s2">&quot;main:app&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;info&quot;</span><span class="p">)</span>
-    <span class="n">server</span> <span class="o">=</span> <span class="n">uvicorn</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">websocket_server</span> <span class="o">=</span> <span class="n">WebsocketServer</span><span class="p">()</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">ASGIServer</span><span class="p">(</span><span class="n">websocket_server</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">bind</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;localhost:1234&quot;</span><span class="p">]</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">websocket_server</span><span class="p">:</span>
-        <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">serve</span><span class="p">())</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="n">server</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Future</span><span class="p">()</span>  <span class="c1"># run forever</span>
+        <span class="k">await</span> <span class="n">serve</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;asgi&quot;</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
 </code></pre></div></p>
