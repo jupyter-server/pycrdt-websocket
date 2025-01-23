@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.15.4
+
+([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.3...4c9f21a9e75d7f726f293674abee820837e44ea7))
+
+### Maintenance and upkeep improvements
+
+- Increase pycrdt compatible version range [#104](https://github.com/jupyter-server/pycrdt-websocket/pull/104) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-12-10&to=2025-01-23&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-12-10..2025-01-23&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Afcollonval+updated%3A2024-12-10..2025-01-23&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Apre-commit-ci+updated%3A2024-12-10..2025-01-23&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.15.3
 
 ([Full Changelog](https://github.com/jupyter-server/pycrdt-websocket/compare/v0.15.2...3a74f65bd4d0e27634ec035699828e1cf80bd036))
@@ -15,8 +31,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyter-server/pycrdt-websocket/graphs/contributors?from=2024-12-10&to=2024-12-10&type=c))
 
 [@davidbrochart](https://github.com/search?q=repo%3Ajupyter-server%2Fpycrdt-websocket+involves%3Adavidbrochart+updated%3A2024-12-10..2024-12-10&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.15.2
 
