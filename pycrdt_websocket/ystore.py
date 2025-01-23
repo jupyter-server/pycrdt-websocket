@@ -488,7 +488,7 @@ class SQLiteYStore(BaseYStore):
 
                 if self.document_ttl is not None and diff > self.document_ttl:
                     # squash updates
-                    ydoc = Doc()
+                    ydoc: Doc = Doc()
                     await cursor.execute(
                         "SELECT yupdate FROM yupdates WHERE path = ?",
                         (self.path,),
