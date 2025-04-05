@@ -491,18 +491,35 @@ class SQLiteYStore(BaseYStore):
                     self.history_length is not None
                     and oldest_diff > self.min_cleanup_interval + self.history_length
                 ):
+
+                newest_diff = await self._get_time_differential_to_entry(cursor, direction="DESC")
+                oldest_diff = await self._get_time_differential_to_entry(cursor, direction="ASC")
+
+                squashed = False
+                if (self.document_ttl is not None and newest_diff > self.document_ttl) or (
+                    self.history_length is not None
+                    and oldest_diff > self.min_cleanup_interval + self.history_length
+                ):
                     # squash updates
                     ydoc: Doc = Doc()
 
                     older_than = time.time() - (
                         self.history_length if self.history_length is not None else 0
                     )
+                    older_than = time.time() - (
+                        self.history_length if self.history_length is not None else 0
+                    )
                     await cursor.execute(
-                        "SELECT yupdate FROM yupdates WHERE path = ? AND timestamp < ?",
-                        (self.path, older_than),
+                        "SELECT yupdate FROM yupdates WHERE path = ? AND timestamp < ? AND timestamp < ?",
+                        (self.path, older_than older_than),
                     )
                     for (update,) in await cursor.fetchall():
                         ydoc.apply_update(update)
+                    # delete older history
+                    await cursor.execute(
+                        "DELETE FROM yupdates WHERE path = ? AND timestamp < ?",
+                        (self.path, older_than),
+                    )
                     # delete older history
                     await cursor.execute(
                         "DELETE FROM yupdates WHERE path = ? AND timestamp < ?",
@@ -516,6 +533,7 @@ class SQLiteYStore(BaseYStore):
                         (self.path, squashed_update, metadata, time.time()),
                     )
                     squashed = True
+                    squashed = True
 
                 # finally, write this update to the DB
                 metadata = await self.get_metadata()
@@ -523,6 +541,23 @@ class SQLiteYStore(BaseYStore):
                     "INSERT INTO yupdates VALUES (?, ?, ?, ?)",
                     (self.path, data, metadata, time.time()),
                 )
+
+                if squashed:
+                    # Vacuuming database
+                    await self._db.commit()
+                    await cursor.execute("VACUUM")
+
+    async def _get_time_differential_to_entry(
+        self, cursor, direction: Literal["ASC", "DESC"] = "DESC"
+    ) -> float:
+        """Get the time differential to the newest (DESC) or oldest (ASC) entry in the database."""
+        await cursor.execute(
+            "SELECT timestamp FROM yupdates WHERE path = ? "
+            f"ORDER BY timestamp {direction} LIMIT 1",
+            (self.path,),
+        )
+        row = await cursor.fetchone()
+        return (time.time() - row[0]) if row else 0
 
                 if squashed:
                     # Vacuuming database
