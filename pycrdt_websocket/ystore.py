@@ -493,6 +493,7 @@ class SQLiteYStore(BaseYStore):
                 ):
                     # squash updates
                     ydoc: Doc = Doc()
+
                     older_than = time.time() - (
                         self.history_length if self.history_length is not None else 0
                     )
