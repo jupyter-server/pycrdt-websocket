@@ -17,6 +17,7 @@ from anyio.abc import TaskGroup, TaskStatus
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from pycrdt import (
     Awareness,
+    Decoder,
     Doc,
     Subscription,
     YMessageType,
@@ -299,7 +300,27 @@ class YRoom:
                             YMessageType.AWARENESS.name,
                             websocket.path,
                         )
+
+                        # Check if the message is null, which means that it is a
+                        # disconnection message from the client.
+                        is_disconnection_msg = False
+                        decoder = Decoder(read_message(message[1:]))
+                        length = decoder.read_var_uint()
+                        if length == 1:
+                            # Remove client_id and clock information from message
+                            for _ in range(2):
+                                decoder.read_var_uint()
+                            state = decoder.read_var_string()
+                            if state == "null":
+                                is_disconnection_msg = True
+
+                        # Propagate the message to all clients except itself if it is a
+                        # disconnection from the client. This avoid an error when trying
+                        # to send the message to the disconnected client.
                         for client in self.clients:
+                            if is_disconnection_msg and client == websocket:
+                                continue
+
                             self.log.debug(
                                 "Sending Y awareness from client with endpoint "
                                 "%s to client with endpoint: %s",
