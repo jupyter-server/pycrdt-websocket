@@ -36,6 +36,7 @@ from .yutils import put_updates
 
 class YRoom:
     clients: set[Websocket]
+    fork_ydocs: set[Doc]
     ydoc: Doc
     ystore: BaseYStore | None
     ready_event: Event
@@ -87,6 +88,7 @@ class YRoom:
         self.awareness = Awareness(self.ydoc)
         self.awareness.observe(self.send_server_awareness)
         self.clients = set()
+        self.fork_ydocs = set()
         self._on_message = None
         self.exception_handler = exception_handler
         self._stopped = Event()
@@ -153,12 +155,15 @@ class YRoom:
                     return
                 # broadcast internal ydoc's update to all clients, that includes changes from the
                 # clients and changes from the backend (out-of-band changes)
+                for ydoc in self.fork_ydocs:
+                    ydoc.apply_update(update)
+
                 if self.clients:
                     message = create_update_message(update)
                     for client in self.clients:
                         try:
                             self.log.debug(
-                                "Sending Y update to client with endpoint: %s", client.path
+                                "Sending Y update to remote client with endpoint: %s", client.path
                             )
                             self._task_group.start_soon(client.send, message)
                         except Exception as exception:
