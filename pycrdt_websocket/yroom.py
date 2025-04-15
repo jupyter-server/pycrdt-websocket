@@ -25,6 +25,7 @@ from pycrdt import (
     create_sync_message,
     create_update_message,
     handle_sync_message,
+    is_awareness_disconnect_message,
     read_message,
 )
 
@@ -299,7 +300,17 @@ class YRoom:
                             YMessageType.AWARENESS.name,
                             websocket.path,
                         )
+
+                        # Check if the message is a client  awareness disconnect.
+                        disconnection = is_awareness_disconnect_message(message[1:])
+
+                        # Propagate the message to all clients except itself if it is a
+                        # disconnection from the client. This avoid an error when trying
+                        # to send the message to the disconnected client.
                         for client in self.clients:
+                            if disconnection and client == websocket:
+                                continue
+
                             self.log.debug(
                                 "Sending Y awareness from client with endpoint "
                                 "%s to client with endpoint: %s",
